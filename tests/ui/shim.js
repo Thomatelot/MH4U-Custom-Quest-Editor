@@ -40,7 +40,7 @@
   var mods = {
     fs: fs, path: path, 'nw.gui': gui, os: { networkInterfaces: function () { return {}; } },
     crypto: { createCipheriv: function () { throw new Error('no crypto in harness'); }, createDecipheriv: function () { throw new Error('no crypto in harness'); }, createHash: function () { throw new Error('no'); } },
-    zlib: { inflateSync: function (b) { if (!window.pako) throw new Error('no zlib'); return Buf(window.pako.inflate(b)); }, deflateSync: function (b) { if (!window.pako) throw new Error('no zlib'); return Buf(window.pako.deflate(typeof b === 'string' ? new TextEncoder().encode(b) : b)); } },
+    zlib: { inflateSync: function (b) { if (!window.pako) throw new Error('no zlib'); return Buf(window.pako.inflate(b)); }, inflateRawSync: function (b) { if (!window.pako) throw new Error('no zlib'); return Buf(window.pako.inflateRaw(b)); }, deflateSync: function (b) { if (!window.pako) throw new Error('no zlib'); return Buf(window.pako.deflate(typeof b === 'string' ? new TextEncoder().encode(b) : b)); } },
     async: {}, child_process: { exec: function (cmd, opt, cb) { setTimeout(function () { cb(null, window.__tasklist || '"explorer.exe","1"\r\n'); }, 10); } }
   };
   window.require = function (n) { if (!(n in mods)) throw new Error('harness: no module ' + n); return mods[n]; };

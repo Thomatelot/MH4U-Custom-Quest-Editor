@@ -16,6 +16,36 @@
       </div>
     </h2>
 
+    <div class="ui segment" id="updates" style="max-width: 760px; margin: 0 auto 20px; text-align: left">
+      <h4 style="margin: 0 0 8px"><i class="cloud download icon"></i> {{_('UPD_TITLE')}}
+        <span class="citra-path" style="font-weight: normal">&nbsp; {{_('UPD_CURRENT')}} {{config.versionString}}</span></h4>
+      <div>
+        <div class="ui small primary button" ng-class="{loading: upd.state === 'checking', disabled: upd.state === 'downloading' || upd.state === 'installed'}" ng-click="check_updates()"><i class="refresh icon"></i>{{_('UPD_CHECK')}}</div>
+        <div class="ui small basic button" ng-click="open_repo()"><i class="github icon"></i>{{_('UPD_PAGE')}}</div>
+      </div>
+      <p class="citra-note" style="margin-top: 6px">{{_('UPD_OFFLINE_NOTE')}}</p>
+      <div ng-if="upd.state === 'latest'" class="ui small positive message"><i class="check icon"></i>{{_('UPD_LATEST')}} {{upd.info.latest}}</div>
+      <div ng-if="upd.state === 'error'" class="ui small negative message">{{_('UPD_ERROR')}} {{upd.error}}</div>
+      <div ng-if="upd.state === 'available' || upd.state === 'downloading' || (upd.state === 'error' && upd.info)" class="ui small info message">
+        <div class="header">{{_('UPD_AVAILABLE')}} {{upd.info.latest}}</div>
+        <div ng-repeat="n in upd.info.notes" style="margin-top: 6px">
+          <b>{{n.version}}</b>
+          <pre class="upd-notes">{{n.text}}</pre>
+        </div>
+        <div ng-if="can_self_update" style="margin-top: 8px">
+          <div class="ui small green button" ng-class="{loading: upd.state === 'downloading', disabled: upd.state === 'downloading'}" ng-click="install_update()"><i class="download icon"></i>{{_('UPD_INSTALL')}}</div>
+          <span ng-if="upd.state === 'downloading'">{{_('UPD_DOWNLOADING')}} {{mb(upd.done)}}<span ng-if="upd.total"> / {{mb(upd.total)}}</span> MB</span>
+          <p class="citra-note" style="margin-top: 6px">{{_('UPD_NOTE')}}</p>
+        </div>
+        <p ng-if="!can_self_update" style="margin-top: 8px">{{_('UPD_MANUAL')}} <a href="" ng-click="open_repo()">{{repo_page}}</a></p>
+      </div>
+      <div ng-if="upd.state === 'installed'" class="ui small positive message">
+        <div class="header">{{_('UPD_DONE')}} {{upd.version}}</div>
+        <div class="ui small green button" style="margin-top: 8px" ng-click="restart()"><i class="repeat icon"></i>{{_('UPD_RESTART')}}</div>
+        <p class="citra-note" style="margin-top: 6px">{{_('UPD_RESTART_HELP')}}</p>
+      </div>
+    </div>
+
     <h4 style="margin-bottom:0">{{_('SPECIAL_THANKS')}}</h4>
     <span>Ina</span><br>
     <span>MH-Slice</span><br>

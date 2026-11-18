@@ -1,6 +1,21 @@
 /* Texts added by the Citra edition (English + French). Other languages fall back to English. */
 (function() {
   var en = {
+    UPD_TITLE: "Updates",
+    UPD_CURRENT: "This version:",
+    UPD_CHECK: "Check for updates",
+    UPD_PAGE: "GitHub page",
+    UPD_OFFLINE_NOTE: "The editor only goes online when you press Check for updates: it reads the version number and the list of changes of the project on GitHub.",
+    UPD_LATEST: "You have the latest version:",
+    UPD_ERROR: "Could not get the update:",
+    UPD_AVAILABLE: "New version available:",
+    UPD_INSTALL: "Download and install",
+    UPD_DOWNLOADING: "Downloading...",
+    UPD_NOTE: "Only the program (MH4U Quest Editor.exe, about 30 MB) is replaced: your library, backups and settings stay as they are. The previous program is kept as MH4U Quest Editor.exe.old until the next start.",
+    UPD_MANUAL: "This copy cannot update itself (it does not run from MH4U Quest Editor.exe). Download the new version from GitHub:",
+    UPD_DONE: "Update installed: version",
+    UPD_RESTART: "Restart now",
+    UPD_RESTART_HELP: "The editor closes and starts again a few seconds later. If it does not, start MH4U Quest Editor.exe again yourself.",
     CITRA_TITLE: "Citra",
     CITRA_SUBTITLE: "quests in your game",
     CITRA_EVENT_QUESTS: "event quests",
@@ -310,6 +325,21 @@
     GUIDE_HIDDEN: "Hidden parameters"
   };
   var fr = {
+    UPD_TITLE: "Mises à jour",
+    UPD_CURRENT: "Cette version :",
+    UPD_CHECK: "Rechercher une mise à jour",
+    UPD_PAGE: "Page GitHub",
+    UPD_OFFLINE_NOTE: "L'éditeur ne se connecte à Internet que lorsque vous cliquez sur Rechercher une mise à jour : il lit le numéro de version et la liste des changements du projet sur GitHub.",
+    UPD_LATEST: "Vous avez la dernière version :",
+    UPD_ERROR: "Impossible d'obtenir la mise à jour :",
+    UPD_AVAILABLE: "Nouvelle version disponible :",
+    UPD_INSTALL: "Télécharger et installer",
+    UPD_DOWNLOADING: "Téléchargement...",
+    UPD_NOTE: "Seul le programme (MH4U Quest Editor.exe, environ 30 Mo) est remplacé : votre bibliothèque, vos sauvegardes et vos réglages restent tels quels. L'ancien programme est gardé sous le nom MH4U Quest Editor.exe.old jusqu'au prochain démarrage.",
+    UPD_MANUAL: "Cette copie ne peut pas se mettre à jour seule (elle ne tourne pas depuis MH4U Quest Editor.exe). Téléchargez la nouvelle version sur GitHub :",
+    UPD_DONE: "Mise à jour installée : version",
+    UPD_RESTART: "Redémarrer maintenant",
+    UPD_RESTART_HELP: "L'éditeur se ferme puis redémarre quelques secondes plus tard. Sinon, relancez vous-même MH4U Quest Editor.exe.",
     CITRA_SUBTITLE: "quêtes dans votre jeu",
     CITRA_EVENT_QUESTS: "quêtes événement",
     CITRA_FREE_SLOTS: "emplacements libres",

@@ -47,7 +47,7 @@ Monster Hunter is a trademark of Capcom. This project is not affiliated with Cap
 | Semantic UI 2.0.8 (with its icon font, from Font Awesome) | `source/bower_components/semantic-ui` | MIT; the icon font: SIL Open Font License 1.1 |
 | Lato | `source/fonts/` | SIL Open Font License 1.1, (c) Łukasz Dziedzic |
 | pako 1.0.11 (interface tests only) | `tests/ui/pako.min.js` | MIT and Zlib, (c) Andrei Tuputcyn, Vitaly Puzrin, Jean-loup Gailly, Mark Adler |
-| NW.js runtime (releases only, not in the repository) | next to `MH4U Quest Editor.exe` | MIT (NW.js); BSD-style and other open-source licences for Chromium and Node.js |
+| NW.js runtime | `MH4U Quest Editor.exe` (without the application appended to it), `nw.pak`, `icudtl.dat`, `d3dcompiler_47.dll`, `libEGL.dll`, `libGLESv2.dll` | MIT (NW.js); BSD-style and other open-source licences for Chromium and Node.js; `d3dcompiler_47.dll` is Microsoft's redistributable DirectX shader compiler |
 
-The runtime of the releases is the one dasding's editor shipped (an NW.js 0.12-era build from 2016);
-`tools/build_exe.py` takes it from an existing exe and appends the application to it.
+The runtime is the one dasding's editor shipped (an NW.js 0.12-era build from 2016); `tools/build_exe.py`
+keeps it and appends the application (`source/`) to it.

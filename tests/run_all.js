@@ -7,6 +7,7 @@ var withFiles = !!dir && fs.existsSync(path.join(dir, 'quest1'));
 var tests = [
   ['test_library_collections.js', false],
   ['test_check.js', false],
+  ['test_updater.js', false],
   ['test_core.js', true],
   ['test_mib_roundtrip.js', true],
   ['test_autoid.js', true]

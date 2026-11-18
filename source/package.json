@@ -1,6 +1,6 @@
 {
   "name": "mh4u-quest-editor",
-  "version": "3.5.0",
+  "version": "1.0.0",
   "description": "MH4U Quest Editor, Citra edition: custom quests written straight into the event quests of Citra",
   "main": "index.html",
   "scripts": {

@@ -11,6 +11,7 @@ quest, for example), so that the pictures show nothing personal. The game files 
 the editor runs in the browser with an in-memory copy of them (see shim.js).
 """
 import asyncio
+import json
 import os
 import sys
 
@@ -67,6 +68,10 @@ async def main():
             await page.add_init_script(f.read())
         with open(os.path.join(HERE, "shim.js"), encoding="utf-8") as f:
             await page.add_init_script(f.read())
+        # Settings > Check for updates reads the fake copy of the repository of serve.py (same version: up to date)
+        with open(os.path.join(HERE, "..", "..", "source", "package.json"), encoding="utf-8") as f:
+            version = json.load(f)["version"]
+        await page.add_init_script("window.MH4U_UPDATE_BASE = '/update-test/%s/';" % version)
 
         async def ev(js):
             return await page.evaluate("() => { var inj = angular.element(document.body).injector();"
@@ -231,6 +236,14 @@ async def main():
         await shot("french.png")
         await page.evaluate("() => { angular.element(document.body).injector().get('$i18n').select_locale('en'); }")
         await page.wait_for_timeout(1000)
+
+        # Settings > Updates
+        await go("#/settings", 1500)
+        await page.locator("#updates .button:has-text('Check for updates')").click()
+        await page.wait_for_timeout(1000)
+        assert "latest version" in await page.locator("#updates").inner_text(), "update check"
+        box = await page.locator("#updates").bounding_box()
+        await shot("update.png", {"x": box["x"] - 12, "y": box["y"] - 12, "width": box["width"] + 24, "height": box["height"] + 24})
 
         print("page errors:", errors)
         await browser.close()

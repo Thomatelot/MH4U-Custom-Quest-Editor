@@ -1,7 +1,7 @@
 MIT License
 
-Copyright (c) 2015-2016 dasding (original MH4U Custom Quest Editor, versions 1.x and 2.x)
-Copyright (c) 2026 Thomatelot (Citra edition, versions 3.x)
+Copyright (c) 2015-2016 dasding (original MH4U Custom Quest Editor, up to version 2.1.5)
+Copyright (c) 2026 Thomatelot (Citra edition)
 
 This licence covers the SOURCE CODE and the original files of this repository: the application in
 `source/` (its code, views, style sheets and texts), `tests/`, `tools/` and the documentation.
@@ -16,7 +16,8 @@ the MIT licence. "Monster Hunter" is a trademark of Capcom Co., Ltd. This projec
 tool, not affiliated with or endorsed by Capcom or Nintendo.
 
 The libraries in `source/bower_components/`, the fonts in `source/fonts/`, `tests/ui/pako.min.js` and
-the NW.js runtime of the releases keep their own licences (see THIRD_PARTY.md).
+the NW.js runtime (the runtime part of `MH4U Quest Editor.exe`, `nw.pak`, `icudtl.dat` and the three
+`.dll` files) keep their own licences (see THIRD_PARTY.md).
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

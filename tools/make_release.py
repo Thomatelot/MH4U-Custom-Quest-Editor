@@ -1,10 +1,12 @@
 """
 Makes the release zip: the exe built from ./source, the NW.js runtime files and the documents.
 
-    python tools/make_release.py --runtime-dir "<folder of a release>" [--out <folder>]
+    python tools/make_release.py [--runtime-dir <folder>] [--out <folder>]
 
-The runtime folder must hold "MH4U Quest Editor.exe" (or dasding's editor.exe) with nw.pak,
-icudtl.dat, d3dcompiler_47.dll, libEGL.dll and libGLESv2.dll next to it. Writes
+Optional: the repository itself runs as it is (Download ZIP). This makes a smaller zip of the program
+alone, for a GitHub release. The runtime folder (default: the root of the repository) must hold
+"MH4U Quest Editor.exe" (or dasding's editor.exe) with nw.pak, icudtl.dat, d3dcompiler_47.dll,
+libEGL.dll and libGLESv2.dll next to it. Writes
 MH4U-Custom-Quest-Editor-v<version>-windows.zip (default: in ./dist). Python 3, standard library only.
 """
 import argparse
@@ -25,7 +27,7 @@ EXE = "MH4U Quest Editor.exe"
 
 def main():
     ap = argparse.ArgumentParser(description="Make the release zip")
-    ap.add_argument("--runtime-dir", required=True)
+    ap.add_argument("--runtime-dir", default=ROOT)
     ap.add_argument("--out", default=os.path.join(ROOT, "dist"))
     a = ap.parse_args()
     with open(os.path.join(ROOT, "source", "package.json"), encoding="utf-8") as f:

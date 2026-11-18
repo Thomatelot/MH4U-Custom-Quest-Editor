@@ -6,10 +6,11 @@ appended to it (the way dasding built editor.exe). This script takes the runtime
 (the one of a release, or dasding's editor.exe: whatever is appended to it is dropped) and appends a
 fresh zip of ./source to it.
 
-    python tools/build_exe.py --runtime "<release folder>/MH4U Quest Editor.exe" [--out <exe>]
+    python tools/build_exe.py                 (rebuilds MH4U Quest Editor.exe of the repository in place)
+    python tools/build_exe.py --runtime <exe> --out <exe>
 
-Without --out the exe is written at the root of the repository. To run it, it needs the other files of
-the runtime next to it (nw.pak, icudtl.dat, the dlls and the locales folder of a release).
+By default the runtime is taken from MH4U Quest Editor.exe itself, at the root of the repository, next
+to the other files of the runtime (nw.pak, icudtl.dat, the dlls) that it needs to run.
 Only the Python standard library is needed.
 """
 import io

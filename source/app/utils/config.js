@@ -5,8 +5,8 @@
     v4 = process.platform;
   v4 = 0 === v4.indexOf("win") ? "win" : 0 === v4.indexOf("darwin") ? "osx" : "linux";
   var v5 = {
-    major: 3,
-    minor: 5,
+    major: 1,
+    minor: 0,
     patch: 0
   };
   v1.factory("$config", [function() {

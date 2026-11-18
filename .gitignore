@@ -30,14 +30,12 @@ Library_Backups/
 *.cmib
 *.otb
 
-# ---- Builds (releases are attached to GitHub Releases, not committed) ----
-/MH4U Quest Editor.exe
-*.exe
+# ---- Builds and update leftovers (the program itself, MH4U Quest Editor.exe, IS committed) ----
+/dist/
 *.zip
-nw.pak
-icudtl.dat
-*.dll
-/locales/
+*.exe.old
+*.exe.new
+*.tmp-mh4uqe
 
 # ---- Python / Node / tools / OS ----
 __pycache__/
@@ -50,4 +48,3 @@ venv/
 Thumbs.db
 desktop.ini
 .DS_Store
-/dist/

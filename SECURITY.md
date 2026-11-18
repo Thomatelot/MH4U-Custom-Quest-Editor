@@ -17,17 +17,25 @@ changed; a quest copied unchanged from the game is Capcom's data, so do not post
 
 ## What the editor does and does not do
 
-* It runs **offline**. It never connects to anything by itself; the only links are the ones you click in
-  *Settings* (they open your web browser). The proxy, upload and update features of the original editor
-  were removed.
+* It runs **offline**. The only exception is *Settings > Check for updates*: only when you click it, the
+  editor reads two public files of this repository (`source/package.json` and `CHANGELOG.md`, from
+  `raw.githubusercontent.com`) and, if you then click *Download and install*, downloads
+  `MH4U Quest Editor.exe` from there. The download must be the editor, of the announced version (checked
+  before anything is written). Nothing about you, your game or your quests is sent; GitHub only sees
+  ordinary requests for public files. The other links of *Settings* open your web browser. The proxy,
+  upload, update and statistics features of the original editor were removed.
 * It only reads and writes in: the folder of the game's quest files (`quest1`..`quest5`, `otomo1`) that
   was found in Citra's folder or that you chose; its own `Backups` and `Library_Backups` folders (next to
   the program, or the backups folder chosen in *Settings*); its own storage (the library and settings,
-  in the NW.js profile of the app); and the files you export. It reads Citra's `config/qt-config.ini` to
+  in the NW.js profile of the app); the files you export; and, when you install an update, the program
+  file `MH4U Quest Editor.exe` (the previous one is renamed `MH4U Quest Editor.exe.old` and deleted at the
+  next start). *Restart now* writes a small script to the temporary folder and runs it with Windows
+  Script Host, to start the editor again once it is closed. It reads Citra's `config/qt-config.ini` to
   find a custom SD card folder. On Windows it runs `tasklist` to see whether an emulator is running.
 * It never modifies the ROM or your game save (`user1`).
 * Game files are written to a temporary file first, then renamed, and backed up before every write.
-* It does not need administrator rights and contains no installer and no auto-update.
+* It does not need administrator rights, contains no installer, and never updates itself without you
+  asking.
 * Quest files (`.mib`, `.cmib`) and palico files (`.otb`) are binary data read by the editor's own
   parser; nothing in them is executed. Still, only open quests from people you trust and keep your
   backups: a malformed quest can crash the *game*.

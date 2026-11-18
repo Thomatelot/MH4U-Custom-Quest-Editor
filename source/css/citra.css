@@ -123,3 +123,6 @@ html, body, #viewport, .ui.modal, .xt-ov, .xt-box, .xt-ov *, .xt-box *, .ui.moda
 .xt-chk { color: #b58105 !important; font-weight: bold; }
 .xt-chk-err { color: #db2828 !important; }
 .red-note { color: #db2828 !important; font-weight: bold; }
+
+/* release notes in Settings > Updates */
+.upd-notes { white-space: pre-wrap; font-family: inherit; font-size: 0.95em; margin: 2px 0 0; max-height: 220px; overflow-y: auto; }

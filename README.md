@@ -9,18 +9,15 @@ stopped working when the 3DS online services closed, is replaced by **writing th
 game's event quest files**, with automatic backups. There is no ROM hack: the game is never changed.
 A Windows program, with an English or French interface.
 
-New in 3.5: the first public release. A review pass made the *In-game quests* page faster with many
-backups, keeps the collections when a library backup is restored, and reloads the list from the files
-if a write ever fails. See [CHANGELOG.md](CHANGELOG.md).
+**To start:** green *Code* button > *Download ZIP*, unzip it, double-click **`MH4U Quest Editor.exe`**.
+Nothing to install or build. Updates come later from *Settings > Check for updates*.
 
-New in 3.4: **quest check** (a ⚠ badge lists what the game may refuse with *"You cannot accept this
-Quest data"*, with one-click fixes), **auto-fill of the Supply Box**, proposals for objectives and
-requirements, the common values of the official quests behind a **?**, the game's **original quests
-brought back from your backups**, **library backups and restore**, and **Ctrl+F** in every page.
-
-New in 3.1-3.3: **automatic quest IDs**, an **ID picker**, auto-fill of **rewards** and **small
-monsters**, official spawn positions, real HP / damage of a monster, a built-in **Guide**, **collections**
-in the library, and browsers for monsters, maps, items and icons.
+Version 1.0.0 is the first public release. Compared with the original editor it adds, among others,
+**automatic quest IDs** and an **ID picker**, a **quest check** (a ⚠ badge lists what the game may refuse
+with *"You cannot accept this Quest data"*, with one-click fixes), **auto-fill** of rewards, Supply Box and
+small monsters from the official quests, the game's **original quests brought back from your
+backups**, **collections** and **backups** of the library, a built-in **Guide**, **Ctrl+F**, and
+**updates from GitHub**. See [CHANGELOG.md](CHANGELOG.md).
 
 <p align="center"><img src="docs/images/home.png" alt="In-game quests: the quests stored in the game, slot by slot" width="820"></p>
 
@@ -108,6 +105,7 @@ write is preceded by a backup of the six files.
   backups** (`Library_Backups`: every 12 hours, before *Delete all* and before a restore, or with the
   button; 30 kept), restored in one click or from a `.cmib` file.
 * **Ctrl+F** in every page (guide, editor tabs...), and the interface text can be selected and copied.
+* **Updates from GitHub** in one click (*Settings > Check for updates*), with the list of changes.
 * **English or French** for everything added by this edition; the original interface also exists in
   Spanish, German, Italian and Chinese.
 
@@ -145,17 +143,18 @@ write is preceded by a backup of the six files.
 | **Computer** | **Windows** (tested). Nothing to install: the program comes with its runtime (NW.js). |
 | **Optional** | **Node.js**, to run the tests; **Python 3**, to rebuild the exe from the sources. |
 
-No internet connection is needed. The only links that go online are the ones you click in *Settings*.
+No internet connection is needed. The editor only goes online when you press *Settings > Check for
+updates* (or click one of the links of *Settings*).
 
 ## Installation
 
-1. **Download** the latest `MH4U-Custom-Quest-Editor-vX.Y.Z-windows.zip` from the
-   [Releases](../../releases) page (the repository itself holds the sources, see
-   [Command line, tests and tools](#command-line-tests-and-tools)).
+1. **Download:** on the GitHub page, green **Code** button > **Download ZIP** (or `git clone`).
 2. **Unzip** it anywhere you can write (not inside *Program Files*): the editor writes its `Backups` and
    `Library_Backups` folders next to itself.
-3. **Start** `MH4U Quest Editor.exe`. Windows SmartScreen may warn about an unknown program the first
-   time (*More info > Run anyway*).
+3. **Start `MH4U Quest Editor.exe`**, at the top of the folder. That is the whole program: the files next
+   to it (`nw.pak`, `icudtl.dat` and three `.dll`) are its runtime and must stay with it; `source`,
+   `docs`, `tests` and `tools` are only for reading or changing the code. Windows SmartScreen may warn
+   about an unknown program the first time (*More info > Run anyway*).
 4. **First start:** the *Citra* box of the library page shows the save that was found, with the number of
    quests and free slots. If it says *not found*, start MH4U once in Citra, quit it, and press the
    refresh button, or choose the folder yourself in *Settings > Citra folder > Browse* (Citra's user
@@ -165,9 +164,13 @@ The quest library of dasding's editor is found again automatically: the editor k
 
 ### Updating
 
-Download the new release and unzip it over the old folder (or into a new folder and move your
-`Backups` and `Library_Backups` folders into it). Your library is not in that folder, it stays where it
-is. Make a *Backup library* first anyway.
+*Settings* (gear icon of the library) > **Check for updates**: the editor reads the version number and
+the list of changes on GitHub and shows what is new. **Download and install** replaces
+`MH4U Quest Editor.exe` (about 30 MB) and nothing else: your library, backups and settings stay as they
+are. The previous program is kept as `MH4U Quest Editor.exe.old` until the next start; **Restart now**
+starts the new version. A copy made with `git clone` can also be updated with `git pull`.
+
+<p align="center"><img src="docs/images/update.png" width="560" alt="Settings: Check for updates"></p>
 
 ## Quick start: your first custom quest
 
@@ -197,6 +200,7 @@ If the game freezes or refuses the quest, restore the backup (*In-game quests > 
 | **Library backups** | `Library_Backups\` next to the `Backups` folder: one `.cmib` file per backup, the 30 newest are kept | Every 12 hours when the library opens, before *Delete All*, before a restore, and *Backup library* |
 | **Your library** | Inside the editor's NW.js profile (browser storage of the app named `mh4u-quest-editor`), like the original editor | Always |
 | **Files you export** | Where you choose | *Export*, *Save a copy as a file...* |
+| **The program itself** | `MH4U Quest Editor.exe`; the previous one kept as `MH4U Quest Editor.exe.old` until the next start | *Settings > Check for updates > Download and install* |
 
 Besides Citra's settings file (`config\qt-config.ini`, only read, to find a custom SD card folder), the
 editor reads and writes nothing else: not the ROM, not your game save (`user1`), nothing in Citra's
@@ -271,6 +275,7 @@ rests on a test in the game and what rests on reading the game's files.
 | Monster stats (HP, damage, tolerances): table of 141 rows read from the game's program | 🔎 The order of the 5 tolerance columns and the meaning of *Stamina* / *Status* are not confirmed; values above 140 are not documented |
 | Original quests from the backups, backups as a source, library backups and restore | 🔎 Checked by the tests and in a browser with copies of real files |
 | Challenge IDs 61251-61280, palico slots after the first | ⚠️ Experimental |
+| *Check for updates* (version, changes, download, exe swapped, restart) | 🔎 Checked in a browser against a fake copy of the repository; the first real update will be the first after 1.0.0 |
 | Online play with other players | ❔ The game is not modified, so it should keep working when every player has the same quest; not tried |
 | **Real 3DS**, North American and Japanese versions, Lime3DS / Azahar | ❔ Not tested by the author: please report |
 
@@ -315,23 +320,26 @@ it better.** Please:
 | *No free slot* / no ID left | Clear one of your own quests in *In-game quests*, or replace it (*Replace*). Official quests stay locked. |
 | An official quest is missing from the game | *In-game quests*: its slot shows *Original quest* when one of your backups still holds it. |
 | My library is empty or wrong | *Restore library* (library page) lists the library backups; *Restore from a .cmib file...* for a file you kept. |
+| *Check for updates* fails | Check the internet connection, or download the new version from the GitHub page (*Download ZIP*) and copy `MH4U Quest Editor.exe` over yours. The program's folder must be writable (not in *Program Files*). |
 | The emulator-running warning stays | Close Citra / Lime3DS / Azahar completely (also from the system tray), then refresh. |
 | I want everything back as it was | *In-game quests > Backups* and restore the oldest backup, or copy back your own copy of the `user` folder. |
 
 ## Command line, tests and tools
 
-The program needs nothing but the release folder. For developers, the repository holds the readable
-sources of the application (`source/`, an NW.js app: AngularJS 1.4, Semantic UI, ES5 only, as the
-runtime is from 2016), the tests and the tools.
+The program is `MH4U Quest Editor.exe` with its runtime files, at the root. For developers, the
+repository also holds the readable sources of the application (`source/`, an NW.js app: AngularJS 1.4,
+Semantic UI, ES5 only, as the runtime is from 2016), the tests and the tools.
 
-**Rebuild the exe** after a change in `source/` (Python 3, standard library only). The NW.js runtime is
-taken from an existing exe, the one of a release (or dasding's `editor.exe`):
+**Rebuild the exe** after a change in `source/` (Python 3, standard library only):
 
-    python tools/build_exe.py --runtime "<release folder>\MH4U Quest Editor.exe"
+    python tools/build_exe.py
 
-It writes `MH4U Quest Editor.exe` at the root of the repository; copy it over the one of a release
-folder (the other files of the runtime, `nw.pak`, `icudtl.dat`, the dlls, are needed next to it).
-`python tools/make_release.py --runtime-dir "<release folder>"` makes the whole release zip in `dist/`.
+It keeps the NW.js runtime of `MH4U Quest Editor.exe` and replaces the application appended to it by the
+content of `source/`. Raise the version in `source/package.json` and `source/app/utils/config.js` and add
+it to `CHANGELOG.md` before you publish: *Check for updates* compares the version of `source/package.json`
+on GitHub with the running one, shows the matching parts of the changelog, and downloads
+`MH4U Quest Editor.exe` from the repository. `python tools/make_release.py` makes a zip of the program
+alone (exe, runtime, documents) in `dist/`, for a GitHub release.
 
 **Tests** (Node.js; the tests that read game files need a folder holding `quest1`..`quest5` and
 `otomo1`, for example one of your game backups; nothing of the game is in the repository):
@@ -340,12 +348,14 @@ folder (the other files of the runtime, `nw.pak`, `icudtl.dat`, the dlls, are ne
 
 `test_core.js` (encryption and pack format, byte-for-byte rewrite), `test_mib_roundtrip.js` (every quest
 read, exported and read again), `test_autoid.js` (automatic IDs against the real files),
-`test_check.js` (quest check), `test_library_collections.js` (collections and library backups).
+`test_check.js` (quest check), `test_library_collections.js` (collections and library backups),
+`test_updater.js` (versions, release notes, check of a downloaded exe).
 
 **Interface tests and screenshots** (Python 3 with Playwright, Chrome): `tests/ui/serve.py` serves the
 application to a browser with an in-memory copy of the game files (`tests/ui/shim.js` stands in for
 NW.js), and `tests/ui/screenshots.py` walks through the main features and takes the pictures of
-`docs/images/`. See the top of each file.
+`docs/images/`; `tests/ui/test_update_ui.py` runs *Check for updates* against a fake repository. See
+the top of each file.
 
 **Game data:** `source/app/data/gamedata.js` holds the facts the editor needs (difficulty table, base
 HP, DLC IDs and their monsters, official quest titles, statistics of the official quests). It was
@@ -353,7 +363,7 @@ computed from the author's copy of the game with the scripts of `tools/gamedata/
 
 **Layout:** `app/utils/citra_core.js` (encryption and format of the game files), `citra.js` (finding
 Citra, reading, planning and writing, backups), `mib.js` (quest format, import / export), `otb.js`
-(palicos), `library.js` (library, collections, `.cmib`), `gamedata.js` + `data/gamedata.js` (game data,
+(palicos), `library.js` (library, collections, `.cmib`), `updater.js` (updates from GitHub), `gamedata.js` + `data/gamedata.js` (game data,
 auto-fill, quest check, IDs), `findbar.js` (Ctrl+F); `app/views/library/`, `editor/` (with
 `editor_extras.js`), `game/` (*In-game quests*), `guide/`, `palico_editor/`, `settings/`;
 `app/locales/citra_texts.js` (texts of this edition, English and French). Technical notes on the files
