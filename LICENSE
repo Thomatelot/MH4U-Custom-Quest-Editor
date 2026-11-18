@@ -1,0 +1,37 @@
+MIT License
+
+Copyright (c) 2015-2016 dasding (original MH4U Custom Quest Editor, versions 1.x and 2.x)
+Copyright (c) 2026 Thomatelot (Citra edition, versions 3.x)
+
+This licence covers the SOURCE CODE and the original files of this repository: the application in
+`source/` (its code, views, style sheets and texts), `tests/`, `tools/` and the documentation.
+dasding published the original editor under the MIT licence (see its `package.json`); the Citra
+edition keeps that licence.
+
+It does NOT cover Monster Hunter 4 Ultimate or anything that belongs to it. This repository does not
+contain the game, its ROM, a save or a quest file of the game. The small monster icons, map and area
+pictures in `source/img/` and the application icon `source/icon.png` are Capcom's artwork, included
+only so that the editor can show them; they remain the property of Capcom and are NOT licensed under
+the MIT licence. "Monster Hunter" is a trademark of Capcom Co., Ltd. This project is an unofficial fan
+tool, not affiliated with or endorsed by Capcom or Nintendo.
+
+The libraries in `source/bower_components/`, the fonts in `source/fonts/`, `tests/ui/pako.min.js` and
+the NW.js runtime of the releases keep their own licences (see THIRD_PARTY.md).
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

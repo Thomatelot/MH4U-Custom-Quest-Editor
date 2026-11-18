@@ -1,0 +1,224 @@
+<div style="padding: 14px">
+  <input id="gameExportDialog" style="display:none" type="file" nwsaveas="{{export_name}}" />
+
+  <div class="ui segment">
+    <a href="#/library" class="ui tiny button" style="position: absolute; top: 6px; left: 6px"><i class="chevron left icon"></i>{{_('BACK')}}</a>
+    <h1 style="margin-left: 70px; margin-top: 0">{{_('GAME_TITLE')}}</h1>
+
+    <div ng-if="!st.ok" class="ui warning message">
+      <div class="header">{{_('CITRA_NOT_FOUND')}}</div>
+      <p>{{_('CITRA_NOT_FOUND_MSG')}}</p>
+      <a class="ui small button" href="#/settings">{{_('CITRA_CHOOSE_FOLDER')}}</a>
+    </div>
+
+    <div ng-if="st.ok" class="citra-status">
+      <i class="green check circle icon"></i><b>{{st.game.label}}</b>
+      <div class="citra-path">{{st.userPath}}</div>
+      <div ng-repeat="e in st.errors" class="ui tiny red label">{{e}}</div>
+    </div>
+    <div ng-if="running.length" class="ui small warning message">
+      <div class="header">{{_('CITRA_RUNNING')}} ({{running.join(', ')}})</div>
+      <p>{{_('CITRA_RUNNING_MSG')}}</p>
+    </div>
+    <div ng-if="flash" class="ui small message" ng-class="flash.kind === 'red' ? 'negative' : 'positive'"><i class="close icon" ng-click="flash = null"></i>{{flash.text}}</div>
+
+    <div class="citra-buttons" ng-if="st.ok">
+      <div class="ui small icon button" ng-click="refresh(true)" title="{{_('CITRA_RELOAD')}}"><i class="refresh icon"></i></div>
+      <div class="ui small orange labeled icon button" ng-click="backup_now()"><i class="save icon"></i>{{_('CITRA_BACKUP_NOW')}}</div>
+      <div class="ui small orange basic labeled icon button" ng-click="set_tab('backups')"><i class="history icon"></i>{{_('CITRA_RESTORE')}}</div>
+      <div class="ui small labeled icon button" ng-click="open_folder(st.userPath)"><i class="folder open icon"></i>{{_('GAME_OPEN_EXTDATA')}}</div>
+      <div class="ui small labeled icon button" ng-click="open_folder(backups_root)"><i class="folder open icon"></i>{{_('GAME_OPEN_BACKUPS')}}</div>
+    </div>
+  </div>
+
+  <div class="ui segment" ng-if="st.ok">
+    <div class="ui small buttons" style="margin-bottom: 10px">
+      <div class="ui button" ng-class="{blue: tab === 'event'}" ng-click="set_tab('event')">{{_('GAME_TAB_EVENT')}} ({{summary.event}}/{{summary.event + summary.free.event}})</div>
+      <div class="ui button" ng-class="{purple: tab === 'challenge'}" ng-click="set_tab('challenge')">{{_('GAME_TAB_CHALLENGE')}} ({{summary.challenge}})</div>
+      <div class="ui button" ng-class="{red: tab === 'episodic'}" ng-click="set_tab('episodic')">{{_('GAME_TAB_EPISODIC')}} ({{summary.episodic}})</div>
+      <div class="ui button" ng-class="{teal: tab === 'palico'}" ng-click="set_tab('palico')">{{_('GAME_TAB_PALICO')}}</div>
+      <div class="ui button" ng-class="{orange: tab === 'backups'}" ng-click="set_tab('backups')">{{_('GAME_TAB_BACKUPS')}} ({{backups.length}})</div>
+    </div>
+
+    <!-- quests -->
+    <div ng-if="tab === 'event' || tab === 'challenge' || tab === 'episodic'">
+      <div class="game-toolbar">
+        <div class="ui tiny icon input"><input type="text" placeholder="{{_('SEARCH')}}" ng-model="search.$"><i class="search icon"></i></div>
+        <div class="ui checkbox" style="margin-left: 12px">
+          <input type="checkbox" id="showfree" ng-model="$parent.show_free"><label for="showfree">{{_('GAME_SHOW_FREE')}}</label>
+        </div>
+        <div class="ui tiny button" style="float:right" ng-click="all_to_library(tab)"><i class="download icon"></i>{{_('GAME_ALL_TO_LIBRARY')}}</div>
+      </div>
+      <p class="citra-note" ng-if="tab === 'event'"><i class="info circle icon"></i>{{_('GAME_EVENT_HELP')}}</p>
+      <p class="citra-note" ng-if="tab !== 'event'"><i class="info circle icon"></i>{{_('GAME_OTHER_HELP')}}</p>
+      <table class="ui small very basic compact selectable table">
+        <thead>
+          <th class="collapsing">{{_('GAME_SLOT')}}</th>
+          <th class="collapsing">{{_('ID')}}</th>
+          <th>{{_('QUEST_TITLE')}}</th>
+          <th>{{_('MONSTERS')}}</th>
+          <th class="right aligned">{{_('ACTIONS')}}</th>
+        </thead>
+        <tbody>
+          <tr ng-repeat="sl in slots_of(tab) | filter: search track by (sl.pack + sl.index)" ng-class="{'free-slot': sl.empty}">
+            <td class="collapsing"><span class="ui tiny basic label">{{sl.pack}} #{{sl.index + 1}}</span></td>
+            <td class="collapsing">
+              <span ng-if="!sl.empty">{{sl.questId}}</span>
+              <span ng-if="sl.empty && last_id(sl)" class="citra-path" title="{{_('GAME_LAST_ID_HELP')}}">{{last_id(sl)}}</span>
+              <div ng-if="!sl.empty && rank_label(sl.questId)" class="ui tiny compact label">{{rank_label(sl.questId)}}</div>
+              <div ng-if="!sl.empty && locked(sl)" class="ui tiny compact grey label" title="{{_('GAME_LOCKED_HELP')}}"><i class="lock icon"></i>{{_('GAME_LOCKED')}}</div>
+              <div ng-if="!sl.empty && !locked(sl) && tab === 'event'" class="ui tiny compact blue label">{{_('GAME_CUSTOM')}}</div>
+            </td>
+            <td ng-if="sl.empty" colspan="2"><i>{{_('GAME_FREE_SLOT')}}</i></td>
+            <td ng-if="!sl.empty"><h4 style="margin:0">{{title_of(sl) | strip_c}}</h4>
+              <span class="citra-path">{{sl.json.text[text_idx][1]}}</span>
+              <span ng-if="in_library(sl)" class="ui tiny teal label">{{_('GAME_IN_LIBRARY')}}</span>
+            </td>
+            <td ng-if="!sl.empty" class="left aligned">
+              <i ng-repeat="pic in sl.json.pictures track by $index" ng-if="pic !== 98" class="previewicon idx{{pic}}"></i>
+            </td>
+            <td class="collapsing right aligned">
+              <div ng-if="!sl.empty" class="ui small compact button" ng-click="to_library(sl)" title="{{_('GAME_TO_LIBRARY_HELP')}}"><i class="download icon"></i>{{_('GAME_TO_LIBRARY')}}</div>
+              <div ng-if="!sl.empty" class="ui small teal compact icon button" ng-click="export_mib(sl)" title="{{_('EXPORT')}} .mib"><i class="external share icon"></i></div>
+              <div ng-if="!locked(sl) && original_of(sl)" class="ui small orange compact button" ng-click="ask_original(sl)" title="{{_('GAME_ORIGINAL_HELP')}}"><i class="history icon"></i>{{_('GAME_ORIGINAL')}}</div>
+              <div ng-if="!locked(sl)" class="ui small green compact button" ng-click="pick(sl)"><i class="sign in icon"></i>{{sl.empty ? _('GAME_PUT_HERE') : _('GAME_REPLACE')}}</div>
+              <div ng-if="!sl.empty && !locked(sl)" class="ui small red compact icon button" ng-click="ask_clear(sl)" title="{{_('GAME_CLEAR')}}"><i class="trash icon"></i></div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- palicos -->
+    <div ng-if="tab === 'palico'">
+      <p class="citra-note"><i class="info circle icon"></i>{{_('GAME_PALICO_HELP')}}</p>
+      <div ng-if="!st.otomo" class="ui small warning message">otomo1 {{_('GAME_NOT_FOUND')}}</div>
+      <table ng-if="st.otomo" class="ui small very basic compact table">
+        <thead><th class="collapsing">{{_('GAME_SLOT')}}</th><th>{{_('NAME')}}</th><th>{{_('OWNER')}}</th><th class="right aligned">{{_('ACTIONS')}}</th></thead>
+        <tbody>
+          <tr ng-repeat="sl in palico_slots() track by sl.index" ng-class="{'free-slot': sl.empty}">
+            <td class="collapsing"><span class="ui tiny basic label">otomo1 #{{sl.index + 1}}</span>
+              <div ng-if="sl.index > 0" class="ui tiny orange label" title="{{_('GAME_PALICO_EXPERIMENTAL_HELP')}}">{{_('GAME_EXPERIMENTAL')}}</div></td>
+            <td ng-if="sl.empty" colspan="2"><i>{{_('GAME_FREE_SLOT')}}</i></td>
+            <td ng-if="!sl.empty"><h4 style="margin:0">{{sl.json.name}}</h4>{{sl.json.shout}}</td>
+            <td ng-if="!sl.empty">{{sl.json.owner}}</td>
+            <td class="collapsing right aligned">
+              <div ng-if="!sl.empty" class="ui small compact button" ng-click="palico_to_library(sl)"><i class="download icon"></i>{{_('GAME_TO_LIBRARY')}}</div>
+              <div class="ui small green compact button" ng-click="pick_palico(sl)"><i class="sign in icon"></i>{{sl.empty ? _('GAME_PUT_PALICO') : _('GAME_REPLACE')}}</div>
+              <div ng-if="!sl.empty" class="ui small red compact icon button" ng-click="clear_palico(sl)" title="{{_('GAME_CLEAR')}}"><i class="trash icon"></i></div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- backups -->
+    <div ng-if="tab === 'backups'">
+      <p class="citra-note"><i class="info circle icon"></i>{{_('GAME_BACKUPS_HELP')}} <code>{{backups_root}}</code></p>
+      <div ng-if="!backups.length"><i>{{_('GAME_NO_BACKUP')}}</i></div>
+      <table ng-if="backups.length" class="ui small very basic compact table">
+        <thead><th>{{_('GAME_BACKUP_NAME')}}</th><th>{{_('GAME_BACKUP_FILES')}}</th><th class="right aligned">{{_('ACTIONS')}}</th></thead>
+        <tbody>
+          <tr ng-repeat="b in backups track by b.name">
+            <td><b>{{b.name}}</b><div class="citra-path">{{b.created}}</div></td>
+            <td>{{b.files.join(', ')}}</td>
+            <td class="collapsing right aligned">
+              <div class="ui small compact icon button" ng-click="open_folder(b.dir)" title="{{_('GAME_OPEN_BACKUPS')}}"><i class="folder open icon"></i></div>
+              <div class="ui small orange compact button" ng-click="ask_restore(b)"><i class="history icon"></i>{{_('GAME_RESTORE')}}</div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div id="pickmodal" class="ui large modal">
+  <div class="header">{{pick_slot.empty ? _('GAME_PUT_HERE') : _('GAME_REPLACE')}} &mdash; {{pick_slot.pack}} #{{pick_slot.index + 1}}
+    <span ng-if="!pick_slot.empty">({{pick_slot.questId}} {{title_of(pick_slot) | strip_c}})</span></div>
+  <div class="scrolling content">
+    <div class="ui small buttons" style="margin-bottom: 8px">
+      <div class="ui button" ng-class="{teal: pick_src === 'library'}" ng-click="set_pick_src('library')">{{_('GAME_SRC_LIBRARY')}}</div>
+      <div class="ui button" ng-class="{orange: pick_src === 'backup'}" ng-click="set_pick_src('backup')">{{_('GAME_SRC_BACKUP')}}</div>
+    </div>
+    <div ng-if="pick_src === 'backup'" style="margin-bottom: 8px">
+      <div ng-if="!pick_backups.length"><i>{{_('GAME_NO_BACKUP')}}</i></div>
+      <div ng-if="pick_backups.length" class="ui small form"><div class="field"><select ng-model="pick_backup" ng-change="load_backup_rows()" ng-options="b.name as (b.name) for b in pick_backups"></select></div></div>
+      <div class="citra-note">{{_('GAME_SRC_BACKUP_HELP')}}</div>
+    </div>
+    <div class="ui tiny icon input" style="margin-bottom: 8px"><input type="text" placeholder="{{_('SEARCH')}}" ng-model="pick_search"><i class="search icon"></i></div>
+    <div ng-if="!pick_candidates().length"><i>{{_('GAME_PICK_EMPTY')}}</i></div>
+    <table class="ui small very basic compact selectable table">
+      <tbody>
+        <tr ng-repeat="q in pick_candidates() | filter: pick_search track by (q.uuid || q.key)" ng-click="choose(q)" ng-class="{active: pick_choice === q}" style="cursor: pointer">
+          <td class="collapsing"><span ng-if="q.json.quest_id">{{q.json.quest_id}}</span><span ng-if="!q.json.quest_id" class="ui tiny teal label">{{_('ID_AUTO')}}</span></td>
+          <td><b>{{q.json.text[text_idx][0] | strip_c}}</b>
+            <span ng-if="q.official" class="ui tiny grey label"><i class="lock icon"></i>{{_('GAME_LOCKED')}}</span><span ng-if="q.key && !q.official" class="ui tiny blue label">{{_('GAME_CUSTOM')}}</span></td>
+          <td class="left aligned"><i ng-repeat="pic in q.json.pictures track by $index" ng-if="pic !== 98" class="previewicon idx{{pic}}"></i></td>
+        </tr>
+      </tbody>
+    </table>
+    <div ng-if="pick_plan">
+      <div ng-if="pick_plan.ok" class="ui small positive message">
+        <i class="sign in icon"></i>{{pick_plan.questId}} &rarr; {{pick_plan.pack}} #{{pick_plan.slot + 1}}
+        <span ng-if="pick_plan.autoId" class="ui tiny teal label" title="{{_('ID_HOW_' + pick_plan.autoId.how)}}"><i class="magic icon"></i>{{_('ID_AUTO_STATUS')}}</span>
+        <span ng-if="pick_plan.replace">({{_('CITRA_REPLACES')}} {{pick_plan.replaces.questId}})</span>
+      </div>
+      <div ng-if="pick_plan.restriction" class="ui small warning message"><i class="warning sign icon"></i>{{_('CITRA_RESTRICTED')}} {{pick_plan.restriction}}</div>
+      <div ng-if="!pick_plan.ok" class="ui small negative message"><i class="remove icon"></i>{{_('CITRA_ERR_' + pick_plan.error)}} {{pick_plan.detail}}</div>
+    </div>
+  </div>
+  <div class="actions">
+    <div class="ui cancel button">{{_('CANCEL')}}</div>
+    <div class="ui green button" ng-class="{disabled: !pick_plan.ok}" ng-click="confirm_pick()"><i class="sign in icon"></i>{{_('CITRA_WRITE')}}</div>
+  </div>
+</div>
+
+<div id="palicomodal" class="ui small modal">
+  <div class="header">otomo1 #{{palico_slot.index + 1}}</div>
+  <div class="scrolling content">
+    <div ng-if="palico_slot.index > 0" class="ui small warning message">{{_('GAME_PALICO_EXPERIMENTAL_HELP')}}</div>
+    <div ng-if="!palico_library.length"><i>{{_('GAME_PICK_EMPTY')}}</i></div>
+    <table class="ui small very basic compact selectable table">
+      <tbody>
+        <tr ng-repeat="p in palico_library track by p.uuid" ng-click="confirm_palico(p)" style="cursor: pointer">
+          <td><b>{{p.json.name}}</b> &mdash; {{p.json.owner}}</td>
+          <td class="collapsing"><i class="sign in icon"></i></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="actions"><div class="ui cancel button">{{_('CANCEL')}}</div></div>
+</div>
+
+<div id="clearmodal" class="ui small modal">
+  <div class="header">{{_('GAME_CLEAR')}} &mdash; {{clear_slot_target.pack}} #{{clear_slot_target.index + 1}}</div>
+  <div class="content"><p>{{clear_slot_target.questId}} {{title_of(clear_slot_target) | strip_c}}</p><p>{{_('GAME_CLEAR_MSG')}}</p>
+    <div ng-if="clear_original" class="ui checkbox"><input type="checkbox" id="clrorig" ng-model="clear_opts.restore"><label for="clrorig">{{_('GAME_CLEAR_RESTORE')}} <b>{{clear_original.questId}} {{clear_original.title | strip_c}}</b> ({{clear_original.backup}})</label></div></div>
+  <div class="actions">
+    <div class="ui cancel button">{{_('CANCEL')}}</div>
+    <div class="ui red approve button">{{_('GAME_CLEAR')}}</div>
+  </div>
+</div>
+
+<div id="restoremodal" class="ui small modal">
+  <div class="header">{{_('GAME_RESTORE')}} &mdash; {{restore_target.name}}</div>
+  <div class="content"><p>{{_('GAME_RESTORE_MSG')}}</p></div>
+  <div class="actions">
+    <div class="ui cancel button">{{_('CANCEL')}}</div>
+    <div class="ui orange approve button">{{_('GAME_RESTORE')}}</div>
+  </div>
+</div>
+
+<div id="origmodal" class="ui small modal">
+  <div class="header"><i class="history icon"></i>{{_('GAME_ORIGINAL')}} &mdash; {{orig_target.pack}} #{{orig_target.index + 1}}</div>
+  <div class="content">
+    <p><b>{{orig_info.questId}} {{orig_info.title | strip_c}}</b> ({{orig_info.backup}})</p>
+    <p>{{_('GAME_ORIGINAL_MSG')}}</p>
+    <p ng-if="!orig_target.empty" class="citra-note">{{_('GAME_ORIGINAL_REPLACES')}} <b>{{orig_target.questId}} {{title_of(orig_target) | strip_c}}</b></p>
+  </div>
+  <div class="actions">
+    <div class="ui cancel button">{{_('CANCEL')}}</div>
+    <div class="ui orange approve button"><i class="history icon"></i>{{_('GAME_ORIGINAL')}}</div>
+  </div>
+</div>

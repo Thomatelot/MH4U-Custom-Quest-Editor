@@ -1,0 +1,95 @@
+<div style="padding: 14px; min-height: 100%;">
+  <div class="ui segment" style="min-height: 100%; text-align: center">
+  <div ng-click="gotoLibrary()" class="ui tiny button" style="position: absolute; top: 6px; left: 6px">
+    <i class="chevron left icon"></i>
+    {{_('BACK')}}
+  </div>
+
+    <h2 class="ui icon header">
+      <i class="previewicon idx21"></i>
+      <div class="content">
+        Monster Hunter 4 Ultimate Quest Editor
+        <div class="sub header">
+          {{config.versionString}} &mdash; Citra edition<br>
+          original editor by dasding (v2.1.5)
+        </div>
+      </div>
+    </h2>
+
+    <h4 style="margin-bottom:0">{{_('SPECIAL_THANKS')}}</h4>
+    <span>Ina</span><br>
+    <span>MH-Slice</span><br>
+    <span>Knorr</span><br>
+    <span>Statyk</span><br>
+
+    <h4 style="margin-bottom:0">{{_('TRANSLATORS')}}</h4>
+    <span>spanish - Hairo, Anthony</span><br>
+    <span>french - Ina</span><br>
+    <span>chinese - lys1030</span><br>
+    <span>italian - AxisXY</span><br>
+    <span>german - dasding</span><br>
+
+    <h4 style="margin-bottom:0">{{_('CONTACT')}}</h4>
+    <span>GitHub (questions, bugs, ideas)</span><br>
+    <a ng-click="gui.Shell.openExternal('https://github.com/Thomatelot/MH4U-Custom-Quest-Editor/issues')" style="cursor: pointer;">Thomatelot/MH4U-Custom-Quest-Editor</a>
+    <br><span>reddit</span><br>
+    <a ng-click="gui.Shell.openExternal('https://reddit.com/r/MonsterHunterCustoms')" style="cursor: pointer;">/r/MonsterHunterCustoms</a>
+
+    <h4 class="ui horizontal divider header">
+      <i class="settings icon"></i>
+      {{_('SETTINGS')}}
+    </h4>
+    <input id="citraDirDialog" style="display:none" type="file" nwdirectory />
+    <div class="ui form" style="text-align: left; max-width: 760px; margin: 0 auto;">
+      <div class="field">
+        <label>{{_('SETTINGS_CITRA_DIR')}}</label>
+        <div class="ui action input">
+          <input type="text" readonly value="{{custom_dir || (st.detection.userDir ? st.detection.userDir + '  (' + _('SETTINGS_AUTO') + ')' : _('CITRA_NOT_FOUND'))}}">
+          <div class="ui button" ng-click="browse()"><i class="folder open icon"></i>{{_('SETTINGS_BROWSE')}}</div>
+          <div class="ui button" ng-click="auto_detect()" ng-class="{disabled: !custom_dir}">{{_('SETTINGS_AUTO')}}</div>
+        </div>
+        <p class="citra-note">{{_('SETTINGS_CITRA_DIR_HELP')}}</p>
+      </div>
+      <div class="field" ng-if="st.ok">
+        <label>{{_('SETTINGS_SAVE_FOUND')}}</label>
+        <div ng-repeat="g in games" class="ui radio checkbox" style="display:block; margin-bottom: 4px">
+          <input type="radio" name="game" ng-checked="g.extdataId === extdata_id" ng-click="select_game(g.extdataId)" id="g{{$index}}">
+          <label for="g{{$index}}"><b>{{g.label}}</b> <span class="citra-path">{{g.userPath}}</span></label>
+        </div>
+      </div>
+      <div ng-if="!st.ok" class="ui small warning message">
+        <div class="header">{{_('CITRA_NOT_FOUND')}}</div>
+        <p>{{_('CITRA_NOT_FOUND_MSG')}}</p>
+        <p ng-if="st.detection.tried.length" class="citra-path">{{_('SETTINGS_TRIED')}} {{st.detection.tried.join(' ; ')}}</p>
+      </div>
+      <div class="inline field ui checkbox">
+        <input type="checkbox" id="autobackup" ng-model="settings.citra_auto_backup">
+        <label for="autobackup">{{_('SETTINGS_AUTO_BACKUP')}}</label>
+      </div>
+      <div class="field">
+        <label>{{_('SETTINGS_BACKUP_DIR')}}</label>
+        <div class="ui action input">
+          <input type="text" readonly value="{{backups_root}}">
+          <div class="ui button" ng-click="open_folder(backups_root)"><i class="folder open icon"></i></div>
+        </div>
+      </div>
+    </div>
+
+    <div ng-if="eastereggs.unlocked()" style="margin-top: 25px; margin-bottom: 25px;">
+      <h4 class="ui horizontal divider header">
+        <i class="settings icon"></i>
+        {{_('EASTEREGGS')}} ({{eastereggs.unlock_count()}}/{{eastereggs.list.length}})
+      </h4>
+      <form class="ui form">
+        <div class="inline field" ng-repeat="egg in eastereggs.list">
+          <div ng-if="eastereggs.unlocked(egg)" class="inline field ui checkbox">
+            <input type="checkbox" ng-checked="eastereggs.get(egg)" ng-click="eastereggs.toggle(egg)">
+            <label>{{_(egg)}}</label>
+          </div><br>
+        </div>
+
+      </form>
+    </div>
+
+  </div>
+</div>

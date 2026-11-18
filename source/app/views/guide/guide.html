@@ -1,0 +1,295 @@
+<div style="padding: 14px" class="guide-page">
+  <div class="ui segment">
+    <a ng-if="!popup" href="#/library" class="ui tiny button" style="position: absolute; top: 6px; left: 6px"><i class="chevron left icon"></i>{{_('BACK')}}</a>
+    <div ng-if="popup" class="ui tiny button" style="position: absolute; top: 6px; left: 6px" ng-click="close()"><i class="close icon"></i>{{_('CLOSE')}}</div>
+    <h1 style="margin: 0 0 10px 80px">{{_('GUIDE_TITLE')}} <span class="citra-sub">{{_('GUIDE_SUBTITLE')}}</span></h1>
+    <div class="ui small pointing secondary menu guide-menu">
+      <a class="item" ng-repeat="x in sections" ng-class="{active: section === x.id}" ng-click="go(x.id)"><i class="{{x.icon}} icon"></i>{{_(x.label)}}</a>
+    </div>
+
+    <!-- ============================================================ STATS -->
+    <div ng-if="section === 'stats'">
+      <h2>How strong is a monster?</h2>
+      <p>Every large monster of a quest uses one of the quest's <b>5 stat sets</b> (Large monsters &rarr; <i>Stats</i> column).
+        A set holds <b>Size</b>, <b>Size variation</b>, <b>Health</b>, <b>Attack</b>, <b>Resistance</b> (called <i>Break resistance</i> in the editor),
+        <b>Stamina</b> and <b>Status</b>.</p>
+      <div class="ui info message">
+        <b>Health, Attack and Resistance are not percentages.</b> They are row numbers (0 to 140) of a table hard-coded in the game
+        (<code>code.bin</code>, 141 rows &times; 8 multipliers). The game looks the row up and multiplies the monster's own values with it.
+        So <i>Attack 130</i> is not "130 %": it is row 130, which means <b>&times;18 damage</b>.
+      </div>
+      <table class="ui small definition table">
+        <tbody>
+          <tr><td class="collapsing">Health</td><td>column 1 of the row &rarr; <b>HP = base HP of the monster &times; multiplier</b>. Base HP comes from the game's monster data (e.g. Rathalos 4200, Rathian 4500, Great Jaggi 2600; full list in <a ng-click="go('monsters')">Monsters</a>).</td></tr>
+          <tr><td>Attack</td><td>column 2 &rarr; <b>every hit of the monster</b> (claws, breath, tail...) is multiplied by it. Low rank uses rows 0&ndash;30 (&times;0.5&ndash;1.5), high rank rows 46&ndash;74 (&times;2.3&ndash;3.9), G rank rows 95&ndash;110 (&times;6&ndash;8.5).</td></tr>
+          <tr><td>Resistance</td><td>column 3 &rarr; <b>damage the monster takes</b> (defense rate: &times;0.8 means your hits do 80 %, so lower = tougher).<br>
+            columns 4&ndash;8 &rarr; <b>tolerances</b> (how much it takes to flinch, knock out, exhaust, mount, trip... the monster: higher = harder).
+            <span class="ui tiny orange label">probable</span> the exact order of these 5 columns is not confirmed.</td></tr>
+          <tr><td>Stamina / Status</td><td>small profile numbers (Stamina 0&ndash;4, Status 0&ndash;2) that point to other tables of the game which are not decoded yet.
+            Official quests: low and high rank mostly use Stamina 1 and Status 1&ndash;2, G rank uses Stamina 4. <span class="ui tiny orange label">unconfirmed</span></td></tr>
+          <tr><td>Above 140</td><td>The fields accept 0&ndash;255 (one byte) but the game's table stops at row 140, and no official quest goes past row 140. What the game does with a larger value
+            is not confirmed (probably it caps it), so stay at 140 or below. The editor marks such values as <i>out of range</i>. <span class="ui tiny orange label">unconfirmed</span></td></tr>
+        </tbody>
+      </table>
+
+      <h3 data-md="skip">Calculator</h3>
+      <div class="ui form">
+        <div class="five fields">
+          <div class="field"><label>Monster</label>
+            <select class="ui dropdown" ng-model="calc.monster" ng-options="m.id as m.name for m in calc_monsters"></select></div>
+          <div class="field"><label>Health</label><input type="number" min="0" max="255" ng-model="calc.hp"></div>
+          <div class="field"><label>Attack</label><input type="number" min="0" max="255" ng-model="calc.atk"></div>
+          <div class="field"><label>Resistance</label><input type="number" min="0" max="255" ng-model="calc.res"></div>
+          <div class="field"><label>&nbsp;</label>
+            <div class="ui tiny buttons">
+              <div class="ui button" ng-click="set_calc('low')" title="typical official Low rank quest">Low</div>
+              <div class="ui button" ng-click="set_calc('high')" title="typical official High rank quest">High</div>
+              <div class="ui button" ng-click="set_calc('g')" title="typical official G rank quest">G</div>
+              <div class="ui button" ng-click="set_calc('max_official')" title="highest values used by an official quest">Max</div>
+              <div class="ui button" ng-click="set_calc('table_max')" title="last row of the game's table">140</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="ui three small statistics guide-stats" ng-init="" data-md="skip">
+        <div class="statistic">
+          <div class="value">{{calc_result().hp || '-'}}</div>
+          <div class="label">HP ({{calc_result().base_hp}} &times; {{fmt(calc_result().hp_mult)}})</div>
+        </div>
+        <div class="statistic">
+          <div class="value">&times;{{fmt(calc_result().atk_mult)}}</div>
+          <div class="label">damage of its attacks</div>
+        </div>
+        <div class="statistic">
+          <div class="value">&times;{{fmt(calc_result().def_mult)}}</div>
+          <div class="label">damage it takes</div>
+        </div>
+      </div>
+      <p ng-if="calc_result().tol" style="text-align:center" data-md="skip">Tolerances &times;{{fmt(calc_result().tol[0])}} / {{fmt(calc_result().tol[1])}} / {{fmt(calc_result().tol[2])}} / {{fmt(calc_result().tol[3])}} / {{fmt(calc_result().tol[4])}}</p>
+      <div ng-if="calc_result().out_of_range.hp || calc_result().out_of_range.atk || calc_result().out_of_range.res" class="ui small warning message">{{_('STAT_OUT_OF_RANGE')}}</div>
+      <h3>The scale, from the lowest value to the maximum</h3>
+      <p class="citra-note">Standard reference for the three fields. <b>Value</b> is what you type (0&ndash;255); <b>multiplier</b> is what the game does with it. The last column shows in which official rank the value is typical
+        (middle half of the stat sets of the official quests).</p>
+      <div class="ui small buttons" style="margin-bottom: 8px">
+        <div class="ui button" ng-class="{active: ladder_stat === 'hp'}" ng-click="ladder_stat = 'hp'">Health</div>
+        <div class="ui button" ng-class="{active: ladder_stat === 'atk'}" ng-click="ladder_stat = 'atk'">Attack</div>
+        <div class="ui button" ng-class="{active: ladder_stat === 'res'}" ng-click="ladder_stat = 'res'">Resistance</div>
+      </div>
+      <table class="ui small compact celled table">
+        <thead><tr>
+          <th class="collapsing">Value</th>
+          <th>{{ladder_stat === 'hp' ? 'HP multiplier' : (ladder_stat === 'atk' ? 'Damage dealt' : 'Damage taken')}}</th>
+          <th ng-if="ladder_stat === 'res'">Tolerances</th>
+          <th ng-if="ladder_stat === 'hp'">HP of Rathalos ({{G.base_hp[2]}})</th>
+          <th>Typical of</th><th>Note</th></tr></thead>
+        <tbody>
+          <tr ng-repeat="r in ladder() track by r.v" ng-class="{positive: r.typical.length, warning: r.byteMax}">
+            <td><b>{{r.v}}</b></td>
+            <td>{{r.mult === null ? '?' : '&times;' + fmt(r.mult)}}</td>
+            <td ng-if="ladder_stat === 'res'"><span ng-if="r.tol">{{r.tol.map(fmt).join(' / ')}}</span><span ng-if="!r.tol">?</span></td>
+            <td ng-if="ladder_stat === 'hp'">{{r.mult === null ? '?' : (G.base_hp[2] * r.mult | number:0)}}</td>
+            <td>{{r.bands.join(', ') || '-'}}</td>
+            <td>
+              <span ng-if="r.min" class="ui tiny label">lowest value</span>
+              <span ng-repeat="b in r.typical" class="ui tiny green label">typical {{b === 'g' ? 'G rank' : (b === 'high' ? 'High rank' : 'Low rank')}}</span>
+              <span ng-if="r.maxOfficial" class="ui tiny blue label">highest in an official quest</span>
+              <span ng-if="r.tableMax" class="ui tiny label">last row of the game's table</span>
+              <span ng-if="r.byteMax" class="ui tiny orange label">maximum the field accepts (no table row, effect unknown)</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>What the official quests use</h3>
+      <p class="citra-note">Quartiles of the stat sets of the official quests of the game (min / 25 % / median / 75 % / max). Pick values in these ranges to get an "official-like" difficulty.</p>
+      <table class="ui small compact celled table">
+        <thead><tr><th>Rank</th><th>Health</th><th>Attack</th><th>Resistance</th><th>Stamina</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr ng-repeat="r in ranks">
+            <td>{{r.label}}</td>
+            <td>{{r.st.hp.join(' / ')}} <span class="guide-mult">(&times;{{fmt(G.diff_table[r.st.hp[2]][0])}})</span></td>
+            <td>{{r.st.atk.join(' / ')}} <span class="guide-mult">(&times;{{fmt(G.diff_table[r.st.atk[2]][1])}})</span></td>
+            <td>{{r.st.break_res.join(' / ')}} <span class="guide-mult">(&times;{{fmt(G.diff_table[r.st.break_res[2]][2])}})</span></td>
+            <td>{{r.st.stamina.join(' / ')}}</td>
+            <td>{{r.st.status_res.join(' / ')}}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>The full table (code.bin)</h3>
+      <p class="citra-note">Rows used by the calculator are highlighted. Health reads column <b>HP</b>, Attack reads <b>ATK</b>, Resistance reads <b>DEF</b> and the 5 tolerance columns.</p>
+      <div class="guide-table-wrap">
+        <table class="ui very compact small celled selectable table guide-table">
+          <thead><tr><th>Row</th><th>HP</th><th>ATK</th><th>DEF</th><th>Tol 1</th><th>Tol 2</th><th>Tol 3</th><th>Tol 4</th><th>Tol 5</th></tr></thead>
+          <tbody>
+            <tr ng-repeat="t in table" ng-class="row_class(t.i)">
+              <td><b>{{t.i}}</b></td>
+              <td ng-repeat="v in t.r track by $index">{{fmt(v)}}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ============================================================ MONSTERS -->
+    <div ng-if="section === 'monsters'">
+      <h2>Monsters</h2>
+      <p>Base HP is read from the game's monster data (<code>em_data.arc</code>). <b>Difficulty</b> is an estimate written for this editor (1 = beginner, 5 = hardest), not a value of the game,
+        the same one used by the monster picker of the editor.</p>
+      <div class="ui form">
+        <div class="five fields">
+          <div class="field"><label>{{_('MON_KIND')}}</label>
+            <select ng-model="mf.kind"><option value="all">{{_('ALL')}}</option><option value="L">{{_('LARGE_MONSTERS')}}</option><option value="S">{{_('SMALL_MONSTERS')}}</option><option value="O">{{_('MON_OBJECTS')}}</option></select></div>
+          <div class="field"><label>{{_('MON_SPECIES')}}</label>
+            <select ng-model="mf.species"><option value="">{{_('ALL')}}</option><option ng-repeat="sp in species_list" value="{{sp.id}}">{{sp.name}}</option></select></div>
+          <div class="field"><label>{{_('MON_DIFF')}}</label>
+            <select ng-model="mf.diff"><option value="">{{_('ALL')}}</option><option value="1">&#9733;</option><option value="2">&#9733;&#9733;</option><option value="3">&#9733;&#9733;&#9733;</option><option value="4">&#9733;&#9733;&#9733;&#9733;</option><option value="5">&#9733;&#9733;&#9733;&#9733;&#9733;</option></select></div>
+          <div class="field"><label>Sort</label>
+            <select ng-model="mf.sort"><option value="name">Name</option><option value="hp">Base HP</option><option value="diff">Difficulty</option></select></div>
+          <div class="field"><label>&nbsp;</label><input type="text" ng-model="mf.search" placeholder="{{_('SEARCH')}}"></div>
+        </div>
+      </div>
+      <table class="ui very compact small celled table">
+        <thead><tr><th>#</th><th></th><th>Name</th><th>Species</th><th>Difficulty</th><th>Base HP</th><th>HP in a 5&#9733; quest (row 34)</th><th>HP in a G2 quest (row 46)</th></tr></thead>
+        <tbody>
+          <tr ng-repeat="m in monster_list()">
+            <td class="collapsing">{{m.id}}</td>
+            <td class="collapsing"><i ng-if="m.preview !== undefined" class="previewicon idx{{m.preview}}"></i></td>
+            <td>{{m.name}}</td>
+            <td>{{m.species_name}}</td>
+            <td class="guide-stars">{{m.m.diff ? stars(m.m.diff) : ''}}</td>
+            <td>{{m.base_hp || '-'}}</td>
+            <td>{{m.base_hp ? (m.base_hp * G.diff_table[34][0] | number:0) : '-'}}</td>
+            <td>{{m.base_hp ? (m.base_hp * G.diff_table[46][0] | number:0) : '-'}}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ============================================================ SPECIAL -->
+    <div ng-if="section === 'special'">
+      <h2>The "Special" field (Normal / Alternate...)</h2>
+      <p>Each monster entry has a <b>Special</b> byte. It selects a variant that is <b>hard-coded in that monster's own behaviour</b>:
+        the same number means something different for every monster, and most monsters only react to 0.</p>
+      <ul>
+        <li><b>Normal</b> (0) is the regular monster.</li>
+        <li><b>Alternate</b> is the name the original editor gave to the other value seen in official quests, without knowing exactly what it does.
+          The list below shows, for every monster, which values the official quests use and in which quests: the variant is the one you met in that quest.</li>
+        <li>Known effects: Congalala / Emerald Congalala = which mushroom it eats (and the Mario mushroom, value 100); Akantor 1 = permanently enraged; Ruby Basarios 0 = fire attacks, 1 = poison / sleep gas.</li>
+        <li><b>100 and above</b> are used only by collaboration and special event quests (Mario, Metroid, USJ, Poogie...): they enable an event look or behaviour.</li>
+        <li><b>Value 1 on elder dragons and G rank monsters</b> (Gore Magala, Shagaru Magala, Kushala Daora, Zinogre, Dah'ren Mohran, Ukanlos, Crimson Fatalis...) appears in the "Advanced" / final fights: it switches to the scripted version of the fight.
+          <span class="ui tiny orange label">probable</span></li>
+        <li><b>Small monsters and herbivores</b> (Aptonoth, Kelbi, Popo, Felyne, Bnahabra...): values 0 / 1 / 2 appear in about the same numbers in the same quests, so they are most likely look or behaviour variants of the herd (e.g. Kelbi male / female). <span class="ui tiny orange label">probable</span></li>
+        <li><b>Rocks and objects</b> use high values (11, 12, 19, 34...) to pick a model or a variant of the object.</li>
+      </ul>
+      <p>Values that were not in the original editor are now offered as <i>Variant N</i> in the Special dropdown. An unused value is normally ignored by the monster (it behaves as Normal) but it is untested: keep a backup.</p>
+      <div class="ui small buttons" style="margin-bottom: 8px">
+        <div class="ui button" ng-class="{blue: special_filter.kind === 'L'}" ng-click="special_filter.kind = 'L'">{{_('LARGE_MONSTERS')}}</div>
+        <div class="ui button" ng-class="{blue: special_filter.kind !== 'L'}" ng-click="special_filter.kind = 'S'">{{_('SMALL_MONSTERS')}} / {{_('MON_OBJECTS')}}</div>
+      </div>
+      <table class="ui very compact small celled table">
+        <thead><tr><th>Monster</th><th>Value</th><th>Name in the editor</th><th>Official uses</th><th>Example quests</th></tr></thead>
+        <tbody ng-repeat="m in special" ng-if="(special_filter.kind === 'L') === (m.kind === 'L')">
+          <tr ng-repeat="v in m.values">
+            <td ng-if="$first" rowspan="{{m.values.length}}"><b>{{m.name}}</b></td>
+            <td class="collapsing">{{v.v}}</td>
+            <td>{{v.label || '-'}}</td>
+            <td class="collapsing">{{v.n}}</td>
+            <td class="guide-quests">{{v.quests.join(' · ')}}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ============================================================ QUEST IDS -->
+    <div ng-if="section === 'ids'">
+      <h2>Quest IDs and free slots</h2>
+      <p>The game only shows a downloaded quest if its ID is one of the DLC IDs it knows (a list stored in <code>code.bin</code>).
+        The game also has a table that lists the <i>original monsters</i> of many of these IDs. It is not fully known how strictly the game enforces it,
+        so the editor <b>does not block anything</b>: the ID picker shows the original monsters, and the quest check (&#9888; badge of the editor)
+        warns when a quest does not follow them. If the game answers <i>"You cannot accept this Quest data"</i>, prefer an ID without conditions.</p>
+      <ul>
+        <li><b>Event quests</b>: 60001&ndash;60252. <b>Challenge quests</b>: 61001&ndash;61280. <b>Episodic</b>: 62101&ndash;62212 (the game only knows the 18 official ones, which stay locked).</li>
+        <li>A <b>free ID</b> is an empty place of your game: a new quest is added without replacing anything. <b>Auto</b> uses first the free IDs that work with any monster (or with the monsters of the quest), then the IDs of your own quests, and the free IDs that ask for other monsters only when nothing else is left.</li>
+        <li>An ID holding <b>one of your own quests</b> (<i>Custom</i>) can be reused: that quest is replaced after a backup, and the install window tells you which one.</li>
+        <li><b>Official quests</b> (the 78 event quests, 18 episodic and 24 challenge quests of the MH4U wikis) are <b>locked</b>: never replaced, never deleted. You can still view them, export them and copy them to the library to get inspired.</li>
+        <li><b>Leave the ID at 0 ("Auto")</b>: the editor picks a free ID when you send the quest to the game; if none is left, one of your own quests is replaced (never an official one). The chosen ID is then saved in your library.</li>
+        <li>Challenge IDs 61251&ndash;61280 are known by the game but not in its restriction table. <span class="ui tiny orange label">experimental</span></li>
+      </ul>
+      <div class="ui small buttons" style="margin-bottom: 8px">
+        <div class="ui button" ng-class="{blue: id_cat === 'event'}" ng-click="id_cat = 'event'">{{_('GAME_TAB_EVENT')}}</div>
+        <div class="ui button" ng-class="{purple: id_cat === 'challenge'}" ng-click="id_cat = 'challenge'">{{_('GAME_TAB_CHALLENGE')}}</div>
+      </div>
+      <span ng-if="st && st.ok" class="ui label" data-md="skip">{{free_count()}} {{_('ID_FREE')}}</span>
+      <span ng-if="!st || !st.ok" class="ui orange label" data-md="skip">{{_('CITRA_NOT_FOUND')}}</span>
+      <table class="ui very compact small celled table" data-md="skip">
+        <thead><tr><th>ID</th><th>Official quest (original title)</th><th>{{_('ID_COL_REQ')}}</th><th>{{_('ID_COL_STATUS')}}</th></tr></thead>
+        <tbody>
+          <tr ng-repeat="r in id_list()" ng-class="{positive: r.free && st && st.ok}">
+            <td class="collapsing"><b>{{r.id}}</b></td>
+            <td>{{r.title || '-'}}</td>
+            <td><span ng-if="r.unrestricted" class="ui tiny green label">{{_('ID_UNRESTRICTED')}}</span>{{r.req}}</td>
+            <td class="collapsing"><span ng-if="!st || !st.ok">-</span><span ng-if="st && st.ok && r.free" class="ui tiny green label">{{_('ID_FREE')}}</span>
+              <span ng-if="st && st.ok && r.custom" class="ui tiny blue label">{{_('GAME_CUSTOM')}}</span><span ng-if="st && st.ok && r.official" class="ui tiny grey label"><i class="lock icon"></i>{{_('GAME_LOCKED')}}</span>
+              <span ng-if="st && st.ok && !r.free"> {{r.slot.pack}} #{{r.slot.index + 1}}</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ============================================================ MAPS -->
+    <div ng-if="section === 'maps'">
+      <h2>Maps</h2>
+      <p>Coordinates in the monster editor are in the area's own space. The editor now offers <b>official spawn points</b> (positions used by official quests in that area)
+        and a small-monster <b>Auto-fill</b> made from the official layouts of every map.</p>
+      <div class="ui info message">
+        <div class="header">Everwood (map 13)</div>
+        The Everwood is built at random from tiles every time you enter it, so an area has no fixed layout. Official Everwood quests place their
+        large monsters at <b>X 0, Y 0, Z 0</b> (the game then picks a valid position) in areas 1&ndash;4, and start at the base camp.
+        Do the same: keep the coordinates at 0 (button "Set to 0, 0, 0" in the monster editor). There is no fixed area picture: the editor shows the map overview instead.
+      </div>
+      <table class="ui very compact small celled table">
+        <thead><tr><th>#</th><th>Map</th><th>Areas used by official quests</th><th>Area pictures</th><th>Spawn points</th><th>Small-monster templates</th><th>Overview</th></tr></thead>
+        <tbody>
+          <tr ng-repeat="m in maps">
+            <td class="collapsing">{{m.id}}</td>
+            <td>{{m.name}}</td>
+            <td>{{m.areas.join(', ') || '-'}}</td>
+            <td>{{m.images}}/{{m.areas.length}}</td>
+            <td>{{m.points}}</td>
+            <td>{{m.templates}}</td>
+            <td class="collapsing"><img class="guide-overview" ng-src="img/overview/m{{pad(m.id)}}.png" onerror="this.style.display='none'"></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ============================================================ HIDDEN -->
+    <div ng-if="section === 'hidden'">
+      <h2>Hidden parameters found in the official quests</h2>
+      <p>These values are stored in every quest but have no field in the original editor. The editor keeps them untouched when you edit an imported quest
+        (it rewrites the original bytes), so official quests used as a base keep their special behaviour.</p>
+      <table class="ui small definition table">
+        <tbody>
+          <tr><td class="collapsing">Quest types 0 and 16</td><td>0 = several targets without a type, 16 = special quests (research, bonus, repel). Now listed in the Quest type dropdown.</td></tr>
+          <tr><td>Objective 2048</td><td>"reach the goal" of research quests. Now listed in the objectives.</td></tr>
+          <tr><td>Scenario byte</td><td>selects a scripted scenario (tutorials, harvest tour, hunt-a-thon). Values used:
+            <div ng-repeat="x in scenarios" class="guide-quests"><b>{{x.v}}</b>: {{x.quests.join(' · ')}}</div></td></tr>
+          <tr ng-repeat="h in header_fields"><td>Header byte {{h.offset}}</td><td>unknown, used by a few quests:
+            <div ng-repeat="x in h.values" class="guide-quests"><b>{{x.v}}</b>: {{x.quests.join(' · ')}}</div></td></tr>
+          <tr><td>Large monster "unk2"</td><td>set to 1 on the 2nd monster of two-monster waves in official quests.</td></tr>
+          <tr><td>Small monster "crash flag"</td><td>1 for small monsters, 5 for large monsters placed in the small monster list; 3, 4 or 6 on a minority of entries (about 5 % of Jaggi, Bnahabra, Konchu...),
+            meaning unknown. The original editor forced 1 or 5 and lost these values; they are now kept, and new monsters get the value official quests use for them.</td></tr>
+          <tr><td>Small monster "condition"</td><td>255 = always there, 1&ndash;70 = tied to a spawn condition of the quest (see Small monsters &rarr; Conditions).</td></tr>
+          <tr><td>Special values</td><td>every value used by an official quest is now selectable, see <a ng-click="go('special')">Special</a>.</td></tr>
+          <tr><td>Relic weapons and armors</td><td>Relics (Battered, Seasoned, Venerable, Champion's, Beshackled; items 762&ndash;767 and 1650&ndash;1653) can be put in any reward table,
+            but they only turn into a chosen weapon type, armor series or armor piece when a <b>bias</b> is set. That bias is not stored in the quest file: expedition quests (ids 45000&ndash;45002, Everwood)
+            take it from the save data (weapon type, armor series, armor piece), and the quest only carries a gathering rank and a carving rank.
+            A custom quest can therefore give relics, but not choose what they become; this would need a change of the save file. Research only, not implemented in the editor.</td></tr>
+          <tr><td>Monster restrictions</td><td>read from the game itself: the list of the original editor had 16 errors.</td></tr>
+        </tbody>
+      </table>
+      <div class="ui small message">Not possible without modifying the game (romhacking): new monsters, new maps, new items, or more than the 3 &times; 40 event slots. The editor only writes quests, so online play keeps working with players who have the same quests.</div>
+    </div>
+  </div>
+</div>

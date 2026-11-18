@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>MH4U Quest Editor - Citra edition</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="bower_components/semantic-ui/dist/semantic.min.css">
+  <link rel="stylesheet" href="css/fonts.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/sprites.css">
+  <link rel="stylesheet" href="css/areas.css">
+  <link rel="stylesheet" href="css/palico.css">
+  <link rel="stylesheet" href="css/citra.css">
+
+  <script src="bower_components/jquery/dist/jquery.min.js"></script>
+  <script src="bower_components/semantic-ui/dist/semantic.min.js"></script>
+  <script src="bower_components/angular/angular.min.js"></script>
+  <script src="bower_components/angular-route/angular-route.min.js"></script>
+
+  <script src="app/locales/en.js"></script>
+  <script src="app/locales/fr.js"></script>
+  <script src="app/locales/es.js"></script>
+  <script src="app/locales/de.js"></script>
+  <script src="app/locales/it.js"></script>
+  <script src="app/locales/cn.js"></script>
+  <script src="app/locales/citra_texts.js"></script>
+
+  <script src="app/app.js"></script>
+  <script src="app/utils/config.js"></script>
+  <script src="app/utils/menu.js"></script>
+  <script src="app/utils/constants.js"></script>
+  <script src="app/utils/fix.js"></script>
+  <script src="app/utils/filter.js"></script>
+  <script src="app/utils/i18n.js"></script>
+  <script src="app/utils/citra_core.js"></script>
+  <script src="app/utils/mib.js"></script>
+  <script src="app/utils/otb.js"></script>
+  <script src="app/utils/library.js"></script>
+  <script src="app/utils/citra.js"></script>
+  <script src="app/data/gamedata.js"></script>
+  <script src="app/utils/gamedata.js"></script>
+  <script src="app/utils/eastereggs.js"></script>
+  <script src="app/utils/findbar.js"></script>
+
+  <script src="app/views/library/library.js"></script>
+  <script src="app/views/editor/editor.js"></script>
+  <script src="app/views/palico_editor/editor.js"></script>
+  <script src="app/views/settings/settings.js"></script>
+  <script src="app/views/game/game.js"></script>
+  <script src="app/views/editor/editor_extras.js"></script>
+  <script src="app/views/guide/guide.js"></script>
+</head>
+
+<body ng-app="editor" ng-cloak>
+  <div id="viewport" ng-view></div>
+
+  <div ng-controller="EastereggsController">
+    <style ng-if="eastereggs.get('rainbows')" type="text/css">@import url("css/eastereggs/rainbows.css");</style>
+    <style ng-if="eastereggs.get('darkmode')" type="text/css">@import url("css/eastereggs/darkmode.css");</style>
+    <style ng-if="eastereggs.get('redmode')" type="text/css">@import url("css/eastereggs/redmode.css");</style>
+    <style ng-if="eastereggs.get('abstract')" type="text/css">@import url("css/eastereggs/swag.css");</style>
+  </div>
+</body>
+
+</html>
+

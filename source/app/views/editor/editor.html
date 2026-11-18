@@ -1,0 +1,344 @@
+<div class="ui grid">
+  <input style="display:none;" id="importSupplies" type="file"/>
+  <input style="display:none" id="exportSupplies" type="file" nwsaveas="supplies.txt" />
+  <input style="display:none;" id="importRewards" type="file"/>
+  <input style="display:none" id="exportRewards" type="file" nwsaveas="rewards.txt" />
+  <div ng-cloak class="sixteen wide column" style="padding-bottom: 0">
+    <!-- Header -->
+    <div class="ui secondary pointing top fixed small menu" style="background-color: whitesmoke">
+      <a class="item" ng-click="gotoLibrary()">
+        <i class="angle left icon"></i>
+        {{_('QUEST_LIBRARY')}}
+        <div class="ui pointing left label" ng-if="lib_length > 0">
+          {{lib_length}}
+        </div>
+      </a>
+      <a class="item nowrap active" data-tab="general">{{_('GENERAL')}}</a>
+      <a class="item nowrap" data-tab="monster">{{_('MONSTERS')}}</a>
+      <a class="item nowrap" data-tab="supply">{{_('SUPPLYBOX')}}</a>
+      <a class="item nowrap" data-tab="rewards">{{_('REWARDS')}}</a>
+      <a class="item nowrap" data-tab="text">{{_('TEXT')}}</a>
+
+      <div class="right menu">
+        <a class="item nowrap xt-chk" ng-if="checkList().length" ng-click="open_checks()" ng-class="{'xt-chk-err': checkErrors() > 0}" title="{{_('CHK_TITLE')}}"><i class="warning sign icon"></i>{{checkList().length}}</a>
+        <div class="item nowrap">
+          <h4>{{quest.text[text_lang][0] || "Untitled"}}</h4>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top: 40px; padding: 14px;">
+      <!-- Tabs -->
+      <div class="ui tab active" data-tab="general">
+        <div ng-include="'app/views/editor/general.html'"></div>
+      </div>
+      <div class="ui tab" data-tab="monster">
+        <div ng-include="'app/views/editor/monster.html'"></div>
+      </div>
+      <div class="ui tab" data-tab="supply">
+        <div ng-include="'app/views/editor/supply.html'"></div>
+      </div>
+      <div class="ui tab" data-tab="rewards">
+        <div class="ui segment" ng-include="'app/views/editor/rewards.html'"></div>
+      </div>
+      <div class="ui tab" data-tab="text">
+        <div class="ui segment" ng-include="'app/views/editor/text.html'"></div>
+      </div>
+      <div style="text-align: right; margin-top: 14px">
+        <div ng-if="save_error" class="ui small negative message" style="text-align:left">{{save_error}}</div>
+        <div class="ui button" ng-click="gotoLibrary()">{{_('CANCEL')}}</div>
+        <div class="ui blue button" ng-class="{'disabled': forms.general.$invalid || forms.reqobj.$invalid || forms.intruder.$invalid || forms.refills.$invalid || forms.small_conditions.$invalid}" ng-click="save()">{{_('SAVE')}}</div>
+      </div>
+
+    <!-- JSON Output -->
+    <div ng-show="eastereggs.get('devmode')" class="ui segment" style="-webkit-user-select: text;">
+      <div class="ui accordion">
+        <div class="title"><i class="dropdown icon"></i>JSON</div>
+        <div class="content">
+          <pre class="noscroll">{{quest | json: 2}}</pre>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div id="loading" class="ui active inverted dimmer" style="height: 100%">
+  <div class="ui text loader">{{_('LOADING')}}</div>
+</div>
+
+<div id="confirmDialog" class="ui small basic modal">
+  <i class="close icon"></i>
+  <div class="header">
+    {{_('UNSAVED_CHANGES')}}
+  </div>
+  <div class="image content">
+    <div class="image">
+      <i class="archive icon"></i>
+    </div>
+    <div class="description">
+      <p>{{_('GO_BACK_TO_LIBRARY')}}</p>
+    </div>
+  </div>
+  <div class="actions">
+    <div class="three fluid ui inverted buttons">
+      <a class="ui cancel red basic inverted button" href="#/library">
+        <i class="remove icon"></i>
+        {{_('DONT_SAVE')}}
+      </a>
+      <div class="ui blue cancel basic inverted button">
+        <i class="remove icon"></i>
+        {{_('CANCEL')}}
+      </div>
+      <a class="ui cancel green basic inverted button" ng-class="{'disabled': forms.general.$invalid || forms.reqobj.$invalid || forms.intruder.$invalid || forms.refills.$invalid || forms.small_conditions.$invalid}" ng-click="save()">
+        <i class="checkmark icon"></i>
+        {{_('SAVE')}}
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- ====== Citra edition 3.1 additions (see extras_modals.html) ====== -->
+<!-- quest id picker -->
+<div id="idpickermodal" class="xt-ov" ng-show="xt.ov.id" ng-click="ov_backdrop($event, 'id')"><div class="xt-box large">
+  <div class="header"><i class="list icon"></i>{{_('ID_PICKER_TITLE')}}</div>
+  <div class="scrolling content">
+    <p class="citra-note">{{_('ID_PICKER_HELP')}} <a href="" ng-click="open_guide('ids')">{{_('STAT_GUIDE_LINK')}}</a></p>
+    <div class="ui segment" style="padding: 8px">
+      <div class="ui small buttons">
+        <div class="ui button" ng-class="{blue: xt.idCat === 'event'}" ng-click="xt.idCat = 'event'; refresh_id_rows()">{{_('GAME_TAB_EVENT')}}</div>
+        <div class="ui button" ng-class="{purple: xt.idCat === 'challenge'}" ng-click="xt.idCat = 'challenge'; refresh_id_rows()">{{_('GAME_TAB_CHALLENGE')}}</div>
+        <div class="ui button" ng-class="{red: xt.idCat === 'episodic'}" ng-click="xt.idCat = 'episodic'; refresh_id_rows()">{{_('GAME_TAB_EPISODIC')}}</div>
+      </div>
+      <div class="ui small buttons" style="margin-left: 14px">
+        <div class="ui button" ng-class="{teal: xt.idFilter.view === 'std'}" ng-click="xt.idFilter.view = 'std'">{{_('ID_VIEW_CUSTOM')}}</div>
+        <div class="ui button" ng-class="{green: xt.idFilter.view === 'free'}" ng-click="xt.idFilter.view = 'free'">{{_('ID_VIEW_FREE')}}</div>
+        <div class="ui button" ng-class="{grey: xt.idFilter.view === 'all'}" ng-click="xt.idFilter.view = 'all'">{{_('ID_VIEW_ALL')}}</div>
+      </div>
+      <div class="ui checkbox" style="margin-left: 14px"><input type="checkbox" id="idf2" ng-model="xt.idFilter.fits"><label for="idf2">{{_('ID_FILTER_FITS')}}</label></div>
+      <div class="ui mini icon input" style="margin-left: 14px"><input type="text" ng-model="xt.idFilter.search" placeholder="{{_('SEARCH')}}"><i class="search icon"></i></div>
+    </div>
+    <div class="citra-note" style="margin-bottom: 6px">{{_('ID_VIEW_HELP_' + xt.idFilter.view)}}</div>
+    <div class="ui small message" ng-class="xt.idAuto ? 'positive' : 'warning'" style="overflow: hidden; line-height: 28px; padding-top: 8px; padding-bottom: 8px">
+      <div class="ui small teal button" style="float: right; margin: 0" ng-click="choose_id(0)"><i class="magic icon"></i>{{_('ID_AUTO')}}</div>
+      <b>{{_('ID_AUTO')}}:</b>
+      <span ng-if="xt.idAuto">{{_('ID_AUTO_WOULD')}} <b>{{xt.idAuto.id}}</b> ({{_('ID_HOW_' + xt.idAuto.how)}})</span>
+      <span ng-if="!xt.idAuto">{{_('ID_AUTO_NONE')}}</span>
+    </div>
+    <table class="ui small very basic compact selectable table">
+      <thead><th class="collapsing">ID</th><th>{{_('ID_COL_STATUS')}}</th><th>{{_('ID_COL_REQ')}}</th><th></th></thead>
+      <tbody>
+        <tr ng-repeat="r in id_rows() track by r.id" ng-class="{positive: r.free, disabled: r.official}">
+          <td class="collapsing"><b>{{r.id}}</b></td>
+          <td>
+            <span ng-if="r.free" class="ui tiny green label">{{_('ID_FREE')}}</span>
+            <span ng-if="r.custom"><span class="ui tiny blue label">{{_('GAME_CUSTOM')}}</span> {{r.slot.pack}} #{{r.slot.index + 1}} &mdash; <i>{{r.slot.title | strip_c}}</i></span>
+            <span ng-if="r.official"><span class="ui tiny grey label"><i class="lock icon"></i>{{_('GAME_LOCKED')}}</span> {{r.slot.pack}} #{{r.slot.index + 1}} &mdash; <i>{{r.slot.title | strip_c}}</i></span>
+          </td>
+          <td>
+            <span ng-if="!r.known" class="ui tiny label" title="{{_('ID_UNKNOWN_HELP')}}">{{_('ID_UNKNOWN')}}</span>
+            <span ng-if="r.known && r.unrestricted">{{_('ID_UNRESTRICTED')}}</span>
+            <span ng-if="r.known && !r.unrestricted" title="{{_('ID_ORIG_NOTE')}}">{{monster_list_names(r.restriction)}}</span>
+          </td>
+          <td class="collapsing">
+            <div ng-if="!r.official" class="ui mini button" ng-class="r.free ? 'blue' : 'orange'" ng-click="choose_id(r.id)">{{r.free ? _('ID_USE') : _('ID_USE_REPLACE')}}</div>
+            <i ng-if="r.official" class="lock icon" title="{{_('ID_LOCKED')}}"></i>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="ui small message" ng-if="!id_rows().length">{{_('ID_VIEW_EMPTY')}}</div>
+  </div>
+  <div class="actions"><div class="ui button" ng-click="ov_close('id')">{{_('CANCEL')}}</div></div>
+</div></div>
+
+<!-- monster picker -->
+<div id="monsterpickermodal" class="xt-ov" ng-show="xt.ov.mon" ng-click="ov_backdrop($event, 'mon')"><div class="xt-box">
+  <div class="header"><i class="filter icon"></i>{{_('MON_PICKER_TITLE')}}</div>
+  <div class="scrolling content">
+    <div class="ui form small">
+      <div class="four fields">
+        <div class="field"><label>{{_('MON_KIND')}}</label>
+          <select ng-model="xt.mon.kind"><option value="all">{{_('ALL')}}</option><option value="L">{{_('LARGE_MONSTERS')}}</option><option value="S">{{_('SMALL_MONSTERS')}}</option><option value="O">{{_('MON_OBJECTS')}}</option></select></div>
+        <div class="field"><label>{{_('MON_SPECIES')}}</label>
+          <select ng-model="xt.mon.species"><option value="">{{_('ALL')}}</option><option ng-repeat="sp in species_list" value="{{sp.id}}">{{sp.name}}</option></select></div>
+        <div class="field"><label>{{_('MON_DIFF')}}</label>
+          <select ng-model="xt.mon.diff"><option value="">{{_('ALL')}}</option><option ng-repeat="d in [1,2,3,4,5]" value="{{d}}">{{d}} &#9733;</option></select></div>
+        <div class="field"><label>{{_('SEARCH')}}</label><input type="text" ng-model="xt.mon.search"></div>
+      </div>
+    </div>
+    <p class="citra-note">{{_('MON_DIFF_HELP')}}</p>
+    <div class="monster-grid">
+      <div class="monster-card" ng-repeat="m in monster_rows() track by m.id" ng-click="pick_monster(m.id)" title="#{{m.id}}">
+        <i class="previewicon idx{{m.preview}}"></i>
+        <div class="name">{{m.name}}</div>
+        <div class="meta">{{gd.speciesName(m.m.species)}}<span ng-if="m.m.diff"> &middot; {{m.m.diff}}&#9733;</span><span ng-if="m.m.guild_rank" title="first Gathering Hall rank"> &middot; {{constants.ranks[m.m.guild_rank]}}+</span></div>
+        <div class="meta" ng-if="m.m.base_hp">{{_('BASE_HP')}} {{m.m.base_hp}}</div>
+      </div>
+    </div>
+  </div>
+  <div class="actions"><div class="ui button" ng-click="ov_close('mon')">{{_('CANCEL')}}</div></div>
+</div></div>
+
+<!-- preview icon picker -->
+<div id="iconpickermodal" class="xt-ov" ng-show="xt.ov.icon" ng-click="ov_backdrop($event, 'icon')"><div class="xt-box">
+  <div class="header"><i class="image icon"></i>{{_('ICON_PICKER_TITLE')}}</div>
+  <div class="scrolling content">
+    <div class="ui form small">
+      <div class="three fields">
+        <div class="field"><label>{{_('SEARCH')}}</label><input type="text" ng-model="xt.icon.search"></div>
+        <div class="field"><label>{{_('MON_SPECIES')}}</label>
+          <select ng-model="xt.icon.species"><option value="">{{_('ALL')}}</option><option ng-repeat="sp in species_list" value="{{sp.id}}">{{sp.name}}</option></select></div>
+        <div class="field"><label>{{_('MON_KIND')}}</label>
+          <select ng-model="xt.icon.kind"><option value="">{{_('ALL')}}</option><option value="L">{{_('LARGE_MONSTERS')}}</option><option value="S">{{_('ICON_OTHER')}}</option></select></div>
+      </div>
+    </div>
+    <div class="monster-grid">
+      <div class="monster-card small" ng-repeat="p in icon_rows() track by p.id" ng-click="pick_icon(p.id)">
+        <i class="previewicon idx{{p.id}}"></i>
+        <div class="name">{{p.name}}</div>
+      </div>
+    </div>
+  </div>
+  <div class="actions"><div class="ui button" ng-click="ov_close('icon')">{{_('CANCEL')}}</div></div>
+</div></div>
+
+<!-- small monster auto-fill -->
+<div id="smallfillmodal" class="xt-ov" ng-show="xt.ov.fill" ng-click="ov_backdrop($event, 'fill')"><div class="xt-box large">
+  <div class="header"><i class="magic icon"></i>{{_('FILL_TITLE')}} &mdash; {{constants.maps[quest.map_id]}}</div>
+  <div class="scrolling content">
+    <p class="citra-note">{{_('FILL_HELP')}}</p>
+    <div class="ui form small">
+      <div class="four fields">
+        <div class="field"><label>{{_('FILL_SOURCE')}}</label>
+          <select ng-model="xt.fill.source" ng-change="refresh_fill_preview()">
+            <option value="typical">{{_('FILL_TYPICAL')}}</option>
+            <option value="template">{{_('FILL_TEMPLATE')}}</option>
+          </select></div>
+        <div class="field" ng-if="xt.fill.source === 'typical'"><label>{{_('FILL_RANK')}}</label>
+          <select ng-model="xt.fill.rank" ng-change="refresh_fill_preview()">
+            <option value="quest">{{_('FILL_RANK_QUEST')}}</option><option value="1">{{_('LOW_RANK')}}</option><option value="5">{{_('HIGH_RANK')}}</option><option value="9">{{_('G_RANK')}}</option><option value="any">{{_('ALL')}}</option>
+          </select></div>
+        <div class="field" ng-if="xt.fill.source === 'template'"><label>{{_('FILL_FROM_QUEST')}}</label>
+          <select ng-model="xt.fill.template" ng-change="refresh_fill_preview()" ng-options="t as (t.rank + '&#9733; ' + (i18n.current_locale() === 'fr' ? t.fr : t.en) + ' (' + t.n + ')') for t in xt.fill.templates"></select></div>
+        <div class="field"><label>{{_('FILL_WAVES')}}</label>
+          <select ng-model="xt.fill.waves"><option value="all">{{_('FILL_ALL_WAVES')}}</option><option value="first">{{_('FILL_FIRST_WAVE')}}</option></select></div>
+        <div class="field"><label>{{_('FILL_MODE')}}</label>
+          <select ng-model="xt.fill.mode"><option value="replace">{{_('FILL_REPLACE')}}</option><option value="append">{{_('FILL_APPEND')}}</option></select></div>
+      </div>
+    </div>
+    <div ng-if="!xt.fill.preview.length" class="ui small warning message">{{_('FILL_NOTHING')}}</div>
+    <table ng-if="xt.fill.preview.length" class="ui small very basic compact table">
+      <thead><th class="collapsing">{{_('AREA')}}</th><th>{{_('SMALL_MONSTERS')}} ({{xt.fill.count}})</th></thead>
+      <tbody><tr ng-repeat="r in xt.fill.preview"><td>{{r.area}}</td><td>{{r.mons}}</td></tr></tbody>
+    </table>
+  </div>
+  <div class="actions">
+    <div class="ui button" ng-click="ov_close('fill')">{{_('CANCEL')}}</div>
+    <div class="ui green button" ng-class="{disabled: !xt.fill.count}" ng-click="apply_smallfill()"><i class="magic icon"></i>{{_('FILL_APPLY')}}</div>
+  </div>
+</div></div>
+
+
+<!-- map picker -->
+<div id="mappickermodal" class="xt-ov" ng-show="xt.ov.map" ng-click="ov_backdrop($event, 'map')"><div class="xt-box">
+  <div class="header"><i class="map icon"></i>{{_('MAP_PICK_TITLE')}}</div>
+  <div class="content">
+    <div class="monster-grid">
+      <div class="monster-card map-card" ng-repeat="m in map_list() track by m.id" ng-click="pick_map(m.id)" ng-class="{active: quest.map_id === m.id}" title="#{{m.id}}">
+        <span class="map-pic"><img ng-if="m.id > 0" ng-src="img/overview/m{{m.id | doublenum}}.png" draggable="false"><i ng-if="m.id <= 0" class="help icon"></i></span>
+        <div class="name">{{m.name}}</div>
+      </div>
+    </div>
+  </div>
+  <div class="actions"><div class="ui button" ng-click="ov_close('map')">{{_('CANCEL')}}</div></div>
+</div></div>
+
+
+<!-- rewards auto-fill -->
+<div id="rewardfillmodal" class="xt-ov" ng-show="xt.ov.rf" ng-click="ov_backdrop($event, 'rf')"><div class="xt-box large">
+  <div class="header"><i class="magic icon"></i>{{_('RF_TITLE')}}</div>
+  <div class="content">
+    <p class="citra-note">{{_('RF_HELP')}}</p>
+    <div class="ui form small">
+      <div class="two fields">
+        <div class="field"><label>{{_('RF_RANK')}}</label>
+          <select ng-model="xt.rf.rank" ng-change="refresh_rf()">
+            <option value="quest">{{_('RF_RANK_QUEST')}}</option><option value="low">{{_('LOW_RANK')}}</option><option value="high">{{_('HIGH_RANK')}}</option><option value="g">{{_('G_RANK')}}</option>
+          </select></div>
+        <div class="field"><label>{{_('RF_MONSTERS')}}</label>
+          <div class="ui basic label" ng-repeat="m in xt.rf.mons track by $index" style="margin-bottom: 2px">{{m}}</div>
+          <span ng-if="!xt.rf.mons.length" class="citra-note">{{_('RF_NO_MONSTER')}}</span>
+          <div class="citra-note" ng-if="xt.rf.mons.length">{{xt.rf.src === 'objectives' ? _('RF_FROM_OBJ') : _('RF_FROM_LARGE')}}</div></div>
+      </div>
+    </div>
+    <div class="ui two column grid">
+      <div class="column" ng-repeat="p in xt.rf.preview track by p.t">
+        <h4><div class="ui checkbox"><input type="checkbox" id="rfchk{{p.t}}" ng-model="xt.rf.tables[p.t]"><label for="rfchk{{p.t}}">{{_(p.label)}}</label></div></h4>
+        <div class="citra-note" ng-if="p.res.generic">{{_('RF_GENERIC')}}</div>
+        <div class="citra-note" ng-if="p.res.fallback.length">{{_('RF_FALLBACK_BAND')}}</div>
+        <div class="citra-note" ng-if="p.rows.length">{{_('RF_BASED_ON')}} {{p.res.n}}</div>
+        <div ng-if="!p.rows.length" class="ui small warning message">{{_('RF_NONE')}}</div>
+        <table ng-if="p.rows.length" class="ui small very basic compact table">
+          <thead><th>{{_('ITEM')}}</th><th class="collapsing">{{_('QUANTITY')}}</th><th class="collapsing">{{_('CHANCE')}}</th></thead>
+          <tbody><tr ng-repeat="r in p.rows track by $index"><td>{{r.name}}</td><td>{{r.qty}}</td><td>{{r.chance}}%</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="actions">
+    <div class="ui button" ng-click="ov_close('rf')">{{_('CANCEL')}}</div>
+    <div class="ui green button" ng-click="apply_rf()"><i class="magic icon"></i>{{_('RF_APPLY')}}</div>
+  </div>
+</div></div>
+
+<!-- initial supplies auto-fill -->
+<div id="supplyfillmodal" class="xt-ov" ng-show="xt.ov.sf" ng-click="ov_backdrop($event, 'sf')"><div class="xt-box large">
+  <div class="header"><i class="magic icon"></i>{{_('SF_TITLE')}}</div>
+  <div class="content">
+    <p class="citra-note">{{_('SF_HELP')}}</p>
+    <div class="ui form small">
+      <div class="two fields">
+        <div class="field"><label>{{_('RF_RANK')}}</label>
+          <select ng-model="xt.sf.rank" ng-change="refresh_sf()">
+            <option value="quest">{{_('RF_RANK_QUEST')}}</option><option value="low">{{_('LOW_RANK')}}</option><option value="high">{{_('HIGH_RANK')}}</option><option value="g">{{_('G_RANK')}}</option>
+          </select></div>
+        <div class="field"><label>{{_('SF_BASED_ON')}}</label>
+          <div class="ui basic label" style="margin-bottom: 2px"><i class="map icon"></i>{{xt.sf.map}}</div>
+          <div class="ui basic label" ng-repeat="m in xt.sf.mons track by $index" style="margin-bottom: 2px">{{m}}</div>
+          <span ng-if="!xt.sf.mons.length" class="citra-note">{{_('RF_NO_MONSTER')}}</span>
+          <div class="citra-note" ng-if="xt.sf.mons.length">{{xt.sf.res.src === 'objectives' ? _('RF_FROM_OBJ') : _('RF_FROM_LARGE')}}</div></div>
+      </div>
+    </div>
+    <div class="ui three column grid">
+      <div class="column" ng-repeat="c in xt.sf.cols track by c.b">
+        <h4><div class="ui checkbox"><input type="checkbox" id="sfchk{{c.b}}" ng-model="xt.sf.boxes[c.b]"><label for="sfchk{{c.b}}">{{_(c.label)}}</label></div></h4>
+        <div ng-if="!c.rows.length" class="ui small warning message">{{_('SF_NONE')}}</div>
+        <div ng-if="c.b === 0 && c.rows.length && xt.sf.res.mapGeneric" class="citra-note">{{_('SF_MAP_GENERIC')}}</div>
+        <table ng-if="c.rows.length" class="ui small very basic compact table">
+          <thead><th>{{_('ITEM')}}</th><th class="collapsing">{{_('QUANTITY')}}</th></thead>
+          <tbody><tr ng-repeat="r in c.rows track by $index"><td>{{r.name}}<span class="citra-note" ng-if="r.copies > 1"> ×{{r.copies}}</span> <span class="citra-note" ng-if="r.kind === 'monster'">({{_('SF_KIND_MONSTER')}})</span></td><td>{{r.qty}}</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="ui checkbox" style="margin-top: 10px"><input type="checkbox" id="sfrefills" ng-model="xt.sf.refills"><label for="sfrefills">{{_('SF_REFILLS')}}</label></div>
+  </div>
+  <div class="actions">
+    <div class="ui button" ng-click="ov_close('sf')">{{_('CANCEL')}}</div>
+    <div class="ui green button" ng-click="apply_sf()"><i class="magic icon"></i>{{_('SF_APPLY')}}</div>
+  </div>
+</div></div>
+
+<!-- quest check -->
+<div id="checkmodal" class="xt-ov" ng-show="xt.ov.chk" ng-click="ov_backdrop($event, 'chk')"><div class="xt-box">
+  <div class="header"><i class="warning sign icon"></i>{{_('CHK_TITLE')}}</div>
+  <div class="content">
+    <p class="citra-note">{{_('CHK_HELP')}}</p>
+    <div class="ui small message" ng-if="!checkList().length">{{_('CHK_NONE')}}</div>
+    <div class="ui small message" ng-repeat="c in checkList() track by $index" ng-class="c.level === 'error' ? 'negative' : 'warning'">
+      <div ng-if="c.fix" class="ui mini compact button" style="float: right; margin-left: 10px" ng-click="fix_check(c)"><i class="wrench icon"></i>{{_('CHK_FIX_' + c.fixKey)}}</div>
+      <b ng-if="c.level === 'error'">{{_('CHK_ERROR')}}</b><b ng-if="c.level !== 'error'">{{_('CHK_WARN')}}</b> {{c.text}}
+    </div>
+  </div>
+  <div class="actions"><div class="ui button" ng-click="ov_close('chk')">{{_('CLOSE')}}</div></div>
+</div></div>

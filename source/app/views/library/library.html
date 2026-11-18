@@ -1,0 +1,542 @@
+<div id="dragdrop" style="height: 100%">
+  <input id="importDialog" style="display:none" type="file" multiple/>
+  <input id="backupDialog" style="display:none" type="file" nwsaveas="cq_backup.cmib" />
+  <input id="restoreDialog" style="display:none" type="file" accept=".cmib" />
+  <div ng-if="lib_flash" class="ui small message" style="margin:10px 14px 0" ng-class="lib_flash.kind === 'red' ? 'negative' : 'positive'"><i class="close icon" ng-click="lib_flash = null"></i>{{lib_flash.text}}</div>
+  <div ng-if="list.length == 0"
+       style="min-height:calc(100vh - 2px);display:flex;justify-content:center;align-items:center;">
+    <div class="ui raised compact center aligned segment" id="dropzone"
+         style="-webkit-font-smoothing: subpixel-antialiased">
+      <div ng-hide="filename">
+        <h2 class="ui center aligned icon header">
+          <i id="dragdropicon" class="massive text file outline icon"></i>
+          <span id="file-incoming-message">Drop a <code>.mib</code> file here!</span>
+        </h2>
+
+        <p>Start editing quests by dropping any encrypted/decrypted <code>.mib</code> file</p>
+        <p>...start a custom quest from scratch, or copy the quests already in your game (Citra)</p>
+        <div ng-click="importDialog()" class="ui small blue button">{{_('IMPORT')}}</div>
+        <div ng-click="open_lib_restore()" class="ui small orange basic button" title="{{_('LIBRARY_RESTORE_HELP')}}"><i class="history icon"></i>{{_('LIBRARY_RESTORE')}}</div>
+        <a href="#/editor" class="ui green compact button">{{_('NEW_QUEST')}}</a>
+        <a href="#/game" class="ui teal compact button"><i class="gamepad icon"></i>{{_('CITRA_GAME_QUESTS')}}</a>
+        <a href="#/guide" class="ui compact button"><i class="book icon"></i>{{_('GUIDE')}}</a>
+        <a href="#/settings" class="ui compact icon button" title="{{_('SETTINGS')}}"><i class="settings icon"></i></a>
+        <div ng-show="error" class="ui large red label"><i class="remove icon"></i>{{_(error)}}</div>
+      </div>
+
+    </div>
+  </div>
+  <div ng-show="list.length > 0" style="padding: 14px">
+    <div class="ui segment" id="citrapanel">
+      <h1>{{_('CITRA_TITLE')}} <span class="citra-sub">{{_('CITRA_SUBTITLE')}}</span></h1>
+      <div style="position: absolute; top: 6px; right: 6px; z-index: 1000">
+        <a class="ui" href="#/guide" title="{{_('GUIDE')}}"><i class="large black book icon"></i></a>
+        <a class="ui" href="#/settings" title="{{_('SETTINGS')}}"><i class="large black settings icon"></i></a>
+      </div>
+      <div id="language_changer" class="ui compact scrolling dropdown" style="position: absolute; right: 80px; top: 7px;background-color: transparent !important; z-index: 1000">
+        <input type="hidden" name="country" value="{{i18n.current_locale()}}">
+        <div class="default text"></div>
+        <i class="dropdown icon"></i>
+        <div class="menu">
+          <div ng-click="i18n.select_locale('en'); refresh_buttons()" class="item" data-value="en"><i class="us flag"></i>English</div>
+          <div ng-click="i18n.select_locale('fr'); refresh_buttons()" class="item" data-value="fr"><i class="fr flag"></i>French</div>
+          <div ng-click="i18n.select_locale('es'); refresh_buttons()" class="item" data-value="es"><i class="es flag"></i>Spanish</div>
+          <div ng-click="i18n.select_locale('de'); refresh_buttons()" class="item" data-value="de"><i class="de flag"></i>German</div>
+          <div ng-click="i18n.select_locale('it'); refresh_buttons()" class="item" data-value="it"><i class="it flag"></i>Italian</div>
+          <div ng-click="i18n.select_locale('cn'); refresh_buttons()" class="item" data-value="cn"><i class="cn flag"></i>Chinese</div>
+        </div>
+      </div>
+
+      <div ng-if="citra.ok" class="citra-status">
+        <i class="green check circle icon"></i>
+        <b>{{citra.game.label}}</b> &mdash;
+        {{citra.summary.event}} {{_('CITRA_EVENT_QUESTS')}} ({{citra.summary.free.event}} {{_('CITRA_FREE_SLOTS')}}),
+        {{citra.summary.challenge}} {{_('CITRA_CHALLENGE_QUESTS')}}, {{citra.summary.episodic}} {{_('CITRA_EPISODIC_QUESTS')}}
+        <div class="citra-path" title="{{citra.userPath}}">{{citra.userPath}}</div>
+        <div ng-repeat="e in citra.errors" class="ui tiny red label">{{e}}</div>
+      </div>
+      <div ng-if="!citra.ok" class="ui small warning message" style="margin-top:0">
+        <div class="header">{{_('CITRA_NOT_FOUND')}}</div>
+        <p>{{_('CITRA_NOT_FOUND_MSG')}}</p>
+      </div>
+
+      <div class="citra-buttons">
+        <a class="ui small blue labeled icon button" ng-class="{disabled: !citra.ok}" href="#/game"><i class="gamepad icon"></i>{{_('CITRA_GAME_QUESTS')}}</a>
+        <div class="ui small green labeled icon button" ng-class="{disabled: !citra.ok}" ng-click="send_selected()"><i class="sign in icon"></i>{{_('CITRA_SEND_SELECTED')}}</div>
+        <div class="ui small icon button" ng-click="refresh_citra(true)" title="{{_('CITRA_RELOAD')}}"><i class="refresh icon"></i></div>
+        <a ng-if="!citra.ok" class="ui small button" href="#/settings">{{_('CITRA_CHOOSE_FOLDER')}}</a>
+        <img ng-if="eastereggs.get('bbq')" src="img/eggs/bbq_spit.gif" style="position: absolute;right: -59px;bottom: -20px;">
+      </div>
+    </div>
+
+    <div ng-show="error" class="ui small red message" style="margin:0 0 10px 0"><i class="close icon" ng-click="error = null"></i>{{_(error)}}</div>
+    <div class="ui shape">
+      <div class="sides">
+
+        <div class="side" ng-class="{'active': !palico_tab}">
+          <div class="ui segment">
+
+            <h1>{{_('QUEST_LIBRARY')}}
+              <div class="ui pointing left label">
+                {{list.length}}
+              </div>
+              <div class="ui tiny icon input" style="font-size: 0.4em;">
+                <input type="text" placeholder="{{_('SEARCH')}}" ng-model="search">
+                <i class="search icon"></i>
+              </div>
+                <img ng-if="eastereggs.get('konchu')" src="img/eggs/konchu.gif" style="  height: 160px;position: absolute;top: -64px;left: 450px;">
+            </h1>
+
+            <div ng-click="toggle_palico()" style="position: absolute; top: 10px; right: 10px; cursor: pointer">
+              <img src="img/palico.png">
+            </div>
+
+            <div class="collections-bar">
+              <a class="ui label coll-chip" ng-class="{active: coll === 'all'}" ng-click="set_coll('all')"><i class="grid layout icon"></i>{{_('COLL_ALL')}} <span class="detail">{{list.length}}</span></a>
+              <a class="ui label coll-chip" ng-class="{active: coll === 'none'}" ng-click="set_coll('none')">{{_('COLL_UNSORTED')}} <span class="detail">{{count_none}}</span></a>
+              <a ng-repeat="c in coll_list track by c.id" class="ui {{c.color}} label coll-chip" ng-class="{active: coll === c.id, basic: coll !== c.id}" ng-click="set_coll(c.id)"><i class="folder icon"></i>{{c.name}} <span class="detail">{{c.count}}</span></a>
+              <a class="ui basic label coll-chip" ng-click="open_coll_edit(null)" title="{{_('COLL_NEW_HELP')}}"><i class="plus icon"></i>{{_('COLL_NEW')}}</a>
+              <span ng-if="is_coll(coll)" class="coll-tools">
+                <a class="ui mini basic icon button" ng-click="open_coll_edit(coll)" title="{{_('COLL_EDIT')}}"><i class="edit icon"></i></a>
+                <a class="ui mini basic icon button" ng-click="coll_move_by(coll, -1)" title="{{_('COLL_LEFT')}}"><i class="left arrow icon"></i></a>
+                <a class="ui mini basic icon button" ng-click="coll_move_by(coll, 1)" title="{{_('COLL_RIGHT')}}"><i class="right arrow icon"></i></a>
+                <a class="ui mini basic orange button" ng-click="export_collection()" title="{{_('COLL_EXPORT_HELP')}}"><i class="save icon"></i>{{_('COLL_EXPORT')}}</a>
+              </span>
+              <div class="ui mini checkbox coll-group" ng-if="coll === 'all' && coll_list.length">
+                <input type="checkbox" id="collgroup" ng-model="gv.on" ng-change="set_group_view()"><label for="collgroup">{{_('COLL_GROUP')}}</label>
+              </div>
+            </div>
+
+            <table class="ui small very basic compact table">
+              <thead>
+                <th class="center aligned" title="{{_('SELECT_HELP')}}">{{_('SELECT')}}</th>
+                <th style="cursor: pointer;" ng-click="toggle_sort('json.quest_id')">
+                  {{_('ID')}}
+                  <i ng-show="sortBy === 'json.quest_id' && !sortReverse" class="icon caret down"></i>
+                  <i ng-show="sortBy === 'json.quest_id' && sortReverse" class="icon caret up"></i>
+                </th>
+                <th>{{_('QUEST_TITLE')}}</th>
+                <th>{{_('MONSTERS')}}</th>
+                <th class="center aligned">{{_('CITRA_IN_GAME')}}</th>
+                <th>{{_('ACTIONS')}}</th>
+              </thead>
+              <tbody ng-repeat="g in groups track by g.key">
+              <tr ng-if="g.header" class="coll-head">
+                <td colspan="6" ng-click="toggle_group(g)" style="cursor: pointer">
+                  <i class="icon" ng-class="g.collapsed ? 'caret right' : 'caret down'"></i>
+                  <span class="ui {{g.color}} label" ng-if="g.id"><i class="folder icon"></i>{{g.name}}</span>
+                  <span class="ui label" ng-if="!g.id">{{_('COLL_UNSORTED')}}</span>
+                  <span class="citra-note">{{g.items.length}} <span ng-if="!g.items.length">&mdash; {{_('COLL_EMPTY')}}</span></span>
+                </td>
+              </tr>
+              <tr ng-repeat="quest in g.rows track by quest.uuid">
+                <td class="collapsing center aligned">
+                  <div class="ui checkbox" style="margin-left: 9px; margin-top: 4px">
+                    <input type="checkbox"
+                           ng-model="quest.hosted"
+                           ng-true-value="true"
+                           ng-false-value="false"
+                           ng-change="clearDuplicateHost(quest)"/>
+                    <label></label>
+                  </div>
+                </td>
+                <td class="collapsing center aligned">
+                <span ng-if="quest.json.quest_id">{{quest.json.quest_id}}</span><span ng-if="!quest.json.quest_id" class="ui tiny teal label" title="{{_('ID_AUTO_HELP')}}">{{_('ID_AUTO')}}</span><br>
+                <div ng-show="isEpisodic(quest)" class="ui tiny compact red label">Episodic</div>
+                <div ng-show="isChallenge(quest)" class="ui tiny compact purple label">Challenge</div>
+                </td>
+                <td class="collapsing" style="white-space: pre;"><h4>{{quest.json.text[text_idx][0] | strip_c}} <span ng-if="show_coll_label && cinfo(quest.collection)" class="ui tiny {{cinfo(quest.collection).color}} label"><i class="folder icon"></i>{{cinfo(quest.collection).name}}</span></h4>{{quest.json.text[0][1]}}</td>
+                <td class="left aligned">
+                  <i ng-if="quest.json.pictures[0] !== 98" class="previewicon idx{{quest.json.pictures[0]}}"></i>
+                  <i ng-if="quest.json.pictures[1] !== 98" class="previewicon idx{{quest.json.pictures[1]}}"></i>
+                  <i ng-if="quest.json.pictures[2] !== 98" class="previewicon idx{{quest.json.pictures[2]}}"></i>
+                  <i ng-if="quest.json.pictures[3] !== 98" class="previewicon idx{{quest.json.pictures[3]}}"></i>
+                  <i ng-if="quest.json.pictures[4] !== 98" class="previewicon idx{{quest.json.pictures[4]}}"></i>
+                </td>
+                <td class="collapsing center aligned">
+                  <span ng-if="in_game(quest)" class="ui tiny teal label" title="{{in_game(quest).json.text[text_idx][0]}}">{{in_game(quest).pack}} #{{in_game(quest).index + 1}}</span>
+                  <span ng-if="mib_size(quest) > MIB_MAX" class="ui tiny orange label" title="{{_('CITRA_BIG_HINT')}}">{{mib_size(quest)}} B</span>
+                </td>
+                <td class="collapsing right aligned">
+                  <div class="ui small green compact icon button" ng-class="{disabled: !citra.ok}" ng-click="send_to_game(quest)" title="{{_('CITRA_SEND_ONE_HELP')}}">
+                    <i class="icon sign in"></i>
+                    {{_('CITRA_SEND_ONE')}}
+                  </div>
+                  <a ng-show="!isEpisodic(quest) && !isChallenge(quest)" class="ui small compact icon button" ng-href="#/editor/{{quest.uuid}}/">
+                    <i class="icon edit"></i>
+                    {{_EDIT}}
+                  </a>
+                  <div class="ui small compact icon button" ng-click="open_move([quest.uuid])" title="{{_('COLL_MOVE')}}">
+                    <i class="icon folder open"></i>
+                  </div>
+                  <div class="ui small compact icon button" ng-click="duplicate(quest)">
+                    {{_COPY}}
+                  </div>
+                  <div class="ui small teal compact icon button" ng-click="export(quest.uuid)">
+                    <i class="icon external share"></i>
+                    {{_EXPORT}}
+                  </div>
+                  <div class="ui small red compact icon button" ng-click="library.delete(quest.uuid); refresh_list()">
+                    <i class="icon trash"></i>
+                    {{_DELETE}}
+                  </div>
+                </td>
+              </tr>
+              <tr ng-if="!groups.length || visible_count === 0">
+                <td colspan="6" class="center aligned"><span class="citra-note">{{_('COLL_NONE_HERE')}}</span></td>
+              </tr>
+              </tbody>
+              <tbody>
+              <tr>
+                <td>
+                  <div class="ui checkbox" style="margin-left: 9px; margin-top: 4px">
+                    <input ng-click="select_all()" type="checkbox"/>
+                    <label></label>
+                  </div>
+                </td>
+                <td colspan="5" class="collapsing right aligned">
+                  <div class="ui small button" ng-click="open_move_selected()" title="{{_('COLL_MOVE_SELECTED_HELP')}}"><i class="folder open icon"></i>{{_('COLL_MOVE_SELECTED')}}</div>
+                  <div ng-click="lib_backup_now()" class="ui small orange button" title="{{_('LIBRARY_BACKUP_HELP')}}"><i class="save icon"></i>{{_('LIBRARY_BACKUP')}}</div>
+                  <div ng-click="open_lib_restore()" class="ui small orange basic button" title="{{_('LIBRARY_RESTORE_HELP')}}"><i class="history icon"></i>{{_('LIBRARY_RESTORE')}}</div>
+                  <div class="ui small teal button" ng-click="export_selected()">{{_EXPORT}}</div>
+                  <div ng-click="importDialog()" class="ui small blue button">{{_('IMPORT')}}</div>
+                  <a class="ui small green button" href="#/editor/" ng-click="set_insert_target()">{{_('NEW_QUEST')}}</a>
+
+                  <div class="ui small red button" ng-click="deleteLibrary()">{{_('DELETE_ALL')}}</div>
+                </td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="side" ng-class="{'active': palico_tab}">
+          <div class="ui segment">
+            <h1>{{_('PALICO_LIBRARY')}}</h1>
+            <div ng-click="toggle_palico()" style="position: absolute; top: 10px; right: 10px; cursor: pointer">
+              <img src="img/quest.png">
+            </div>
+
+            <table class="ui small very basic compact table">
+              <thead>
+                <th>{{_('SELECT')}}</th>
+                <th>{{_('FORTE')}}</th>
+                <th>{{_('NAME')}}</th>
+                <th>{{_('OWNER')}}</th>
+                <th>{{_('ACTIONS')}}</th>
+              </thead>
+              <tbody>
+              <tr ng-repeat="palico in palico_list track by $index">
+                <td class="collapsing center aligned">
+                  <div class="ui checkbox" style="margin-left: 9px; margin-top: 4px">
+                    <input type="checkbox"
+                           ng-model="palico.hosted"
+                           ng-true-value="true"
+                           ng-false-value="false"
+                           ng-change="clearDuplicatePalicoHost(palico)"/>
+                    <label></label>
+                  </div>
+                </td>
+                <td class="collapsing"><i class="abilityicon idx{{constants.palico_abilityicon[palico.json.ability]}}"></i></td>
+                <td><h4>{{palico.json.name}}</h4>{{palico.json.shout}}</td>
+                <td>{{palico.json.owner}}</td>
+                <td class="collapsing right aligned">
+                  <a class="ui small compact icon button" ng-href="#/palico_editor/{{palico.uuid}}/">
+                    <i class="icon edit"></i>
+                    {{_EDIT}}
+                  </a>
+                  <div class="ui small teal compact icon button" ng-click="exportPalico(palico.uuid)">
+                    <i class="icon external share"></i>
+                    {{_EXPORT}}
+                  </div>
+                  <div class="ui small red compact icon button" ng-click="library.delete_otb(palico.uuid); refresh_list()">
+                    <i class="icon trash"></i>
+                    {{_DELETE}}
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="ui checkbox" style="margin-left: 9px; margin-top: 4px">
+                    <input ng-click="select_all_otb()" type="checkbox"/>
+                    <label></label>
+                  </div>
+                </td>
+                <td colspan="4" class="collapsing right aligned">
+                  <div ng-click="importDialog()" class="ui small blue button">{{_('IMPORT')}}</div>
+                  <div class="ui small red button" ng-click="deletePalicoLibrary()">{{_('DELETE_ALL')}}</div>
+                </td>
+              </tr>
+              </tbody>
+            </table>
+
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<div id="exportmodal" class="ui small modal">
+  <div class="header">{{export_quest.json.text[0][0]}}</div>
+  <div class="content">
+
+    <div class="ui input">
+      <div class="ui scrolling selection dropdown" style="width: 300px">
+        <input type="hidden" value="none">
+        <div class="text">{{_('UNENCRYPTED')}}</div>
+        <i class="dropdown icon"></i>
+        <div class="menu">
+          <div class="active item" ng-click="select_export_local('none')">{{_('UNENCRYPTED')}}</div>
+          <div class="item" ng-click="select_export_local('us')">{{_('US_ENCRYPTION')}}</div>
+          <div class="item" ng-click="select_export_local('jp')">{{_('JP_ENCRYPTION')}}</div>
+          <div class="item" ng-click="select_export_local('kr')">{{_('KR_ENCRYPTION')}}</div>
+          <div class="item" ng-click="select_export_local('tw')">{{_('TW_ENCRYPTION')}}</div>
+        </div>
+      </div>
+    </div>
+    <br>
+    <div class="ui input" style="margin-top: 15px">
+      <div class="ui checkbox">
+        <input type="checkbox" ng-model="export_info_file" name="export_info_file">
+        <label>{{_('GENERATE_DLC_INFO')}}</label>
+      </div>
+    </div>
+    <input id="saveas" style="display:none" type="file" nwsaveas="m{{export_quest.json.quest_id}}.mib" />
+  </div>
+  <div class="actions">
+    <div class="ui cancel button">{{_('CANCEL')}}</div>
+    <div class="ui blue button" ng-class="{'disabled': export_local === null}" ng-click="saveDialog()">{{_('SAVE_AS')}}</div>
+  </div>
+</div>
+
+<div id="exportselectedmodal" class="ui small modal">
+  <div class="header">{{_('EXPORT_SELECTED')}}</div>
+  <div class="content">
+    <p>{{_('EXPORT_SELECTED_MSG')}}</p>
+    <div class="ui input">
+      <div class="ui scrolling selection dropdown" style="width: 300px">
+        <input type="hidden" value="none">
+        <div class="text">{{_('UNENCRYPTED')}}</div>
+        <i class="dropdown icon"></i>
+        <div class="menu">
+          <div class="active item" ng-click="select_exportselected_local('none')">{{_('UNENCRYPTED')}}</div>
+          <div class="item" ng-click="select_exportselected_local('us')">{{_('US_ENCRYPTION')}}</div>
+          <div class="item" ng-click="select_exportselected_local('jp')">{{_('JP_ENCRYPTION')}}</div>
+          <div class="item" ng-click="select_exportselected_local('kr')">{{_('KR_ENCRYPTION')}}</div>
+          <div class="item" ng-click="select_exportselected_local('tw')">{{_('TW_ENCRYPTION')}}</div>
+        </div>
+      </div>
+    </div>
+    <br>
+    <div class="ui input" style="margin-top: 15px">
+      <div class="ui checkbox">
+        <input type="checkbox" ng-model="export_info_file" name="export_info_file">
+        <label>{{_('GENERATE_DLC_INFO')}}</label>
+      </div>
+    </div>
+    <input id="saveSelectedDialog" style="display:none" type="file" nwdirectory />
+  </div>
+  <div class="actions">
+    <div class="ui cancel button">{{_('CANCEL')}}</div>
+    <div class="ui blue button" ng-class="{'disabled': export_local === null}" ng-click="saveSelectedDialog()">{{_('SAVE_AS')}}</div>
+  </div>
+</div>
+
+
+<div id="exportPalico" class="ui small modal">
+  <div class="header">{{export_palico.json.name}}</div>
+  <div class="content">
+
+    <div class="ui input">
+      <div class="ui scrolling selection dropdown" style="width: 300px">
+        <input type="hidden" value="none">
+        <div class="default text">{{_('CHOOSE_ENCRYPTION')}}</div>
+        <i class="dropdown icon"></i>
+        <div class="menu">
+          <div class="item" ng-click="select_export_local('none')">{{_('UNENCRYPTED')}}</div>
+          <div class="item" ng-click="select_export_local('us')">{{_('US_ENCRYPTION')}}</div>
+          <div class="item" ng-click="select_export_local('jp')">{{_('JP_ENCRYPTION')}}</div>
+          <div class="item" ng-click="select_export_local('kr')">{{_('KR_ENCRYPTION')}}</div>
+          <div class="item" ng-click="select_export_local('tw')">{{_('TW_ENCRYPTION')}}</div>
+        </div>
+      </div>
+    </div>
+    <br>
+    <div class="ui input" style="margin-top: 15px">
+      <div class="ui checkbox">
+        <input type="checkbox" ng-model="export_info_file" name="export_info_file">
+        <label>{{_('GENERATE_DLC_INFO')}}</label>
+      </div>
+    </div>
+    <input id="savePalico" style="display:none" type="file" nwsaveas="{{export_palico.json.name}}.otb" />
+  </div>
+  <div class="actions">
+    <div class="ui cancel button">{{_('CANCEL')}}</div>
+    <div class="ui blue button" ng-class="{'disabled': export_local === null}" ng-click="savePalicoDialog()">{{_('SAVE_AS')}}</div>
+  </div>
+</div>
+
+<div id="libRestoreModal" class="ui modal">
+  <div class="header">{{_('LIBRARY_RESTORE')}}</div>
+  <div class="content">
+    <p class="citra-note"><i class="info circle icon"></i>{{_('LIBRARY_RESTORE_MSG')}} <code>{{lib_dir}}</code></p>
+    <div ng-if="!lib_backups.length"><i>{{_('LIBRARY_NO_BACKUP')}}</i></div>
+    <table ng-if="lib_backups.length" class="ui small very basic compact table">
+      <thead><th>{{_('GAME_BACKUP_NAME')}}</th><th>{{_('LIBRARY_QUESTS')}}</th><th class="right aligned">{{_('ACTIONS')}}</th></thead>
+      <tbody>
+        <tr ng-repeat="b in lib_backups track by b.name">
+          <td><b>{{b.created}}</b><div class="citra-path">{{b.reason}}</div></td>
+          <td>{{b.count}}</td>
+          <td class="collapsing right aligned"><div class="ui small orange compact button" ng-click="lib_restore(b)"><i class="history icon"></i>{{_('GAME_RESTORE')}}</div></td>
+        </tr>
+      </tbody>
+    </table>
+    <div ng-if="lib_confirm" class="ui small warning message">
+      <p>{{_('LIBRARY_RESTORE_CONFIRM')}} <b>{{lib_confirm.created}}</b> ({{lib_confirm.count}})</p>
+      <div class="ui small green button" ng-click="lib_restore_go()">{{_('YES')}}</div>
+      <div class="ui small red basic button" ng-click="lib_confirm = null">{{_('NO')}}</div>
+    </div>
+  </div>
+  <div class="actions">
+    <div class="ui small button" ng-click="lib_open_folder()"><i class="folder open icon"></i>{{_('GAME_OPEN_BACKUPS')}}</div>
+    <div class="ui small button" ng-click="backup()"><i class="save icon"></i>{{_('LIBRARY_SAVE_FILE')}}</div>
+    <div class="ui small button" ng-click="lib_from_file()"><i class="file icon"></i>{{_('LIBRARY_RESTORE_FILE')}}</div>
+    <div class="ui small cancel button">{{_('CLOSE')}}</div>
+  </div>
+</div>
+
+<div id="deleteLibraryDialog" class="ui small basic modal">
+  <div class="header">
+    {{_('DELETE_QUEST_LIBRARY')}}
+  </div>
+  <div class="image content">
+    <div class="image">
+      <i class="warning sign icon"></i>
+    </div>
+    <div class="description">
+      <p>{{_('DELETE_QUEST_LIBRARY_MSG')}}</p>
+    </div>
+  </div>
+  <div class="actions">
+    <div class="three fluid ui inverted buttons">
+      <div class="ui cancel red basic inverted button">
+        <i class="remove icon"></i>
+        {{_('NO')}}
+      </div>
+      <div class="ui approve green basic inverted button">
+        <i class="checkmark icon"></i>
+        {{_('YES')}}
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="nohosted" class="ui small modal">
+  <div class="header">{{_('CITRA_NOTHING_SELECTED')}}</div>
+  <div class="content">
+    <p>{{_('CITRA_NOTHING_SELECTED_MSG')}}</p>
+  </div>
+  <div class="actions">
+    <div class="ui blue cancel button">{{_('OK')}}</div>
+  </div>
+</div>
+
+
+<div id="installmodal" class="ui large modal">
+  <div class="header"><i class="sign in icon"></i>{{_('CITRA_INSTALL_TITLE')}}</div>
+  <div class="scrolling content">
+    <div ng-if="install_running.length" class="ui small warning message">
+      <div class="header">{{_('CITRA_RUNNING')}} ({{install_running.join(', ')}})</div>
+      <p>{{_('CITRA_RUNNING_MSG')}}</p>
+    </div>
+    <table class="ui small very basic compact table">
+      <thead><th>{{_('ID')}}</th><th>{{_('QUEST_TITLE')}}</th><th>{{_('CITRA_DESTINATION')}}</th></thead>
+      <tbody>
+        <tr ng-repeat="r in install_plan" ng-class="{negative: !r.ok}">
+          <td class="collapsing">{{r.questId || _('ID_AUTO')}}
+            <div ng-if="r.autoId" class="ui tiny teal label" title="{{_('ID_HOW_' + r.autoId.how)}}"><i class="magic icon"></i>{{_('ID_AUTO_STATUS')}}</div>
+            <div ng-if="r.autoId" class="citra-note" ng-class="{'orange-note': r.autoId.how === 'replace_custom'}">{{_('ID_HOW_' + r.autoId.how)}}</div>
+          </td>
+          <td>{{r.title | strip_c}}
+            <div ng-if="r.restriction" class="ui tiny orange label"><i class="warning sign icon"></i>{{_('CITRA_RESTRICTED')}} {{r.restriction}}</div>
+            <div ng-repeat="c in r.checks track by $index" class="citra-note" ng-class="c.level === 'error' ? 'red-note' : 'orange-note'"><i class="warning sign icon"></i>{{c.text}}</div>
+          </td>
+          <td>
+            <span ng-if="r.ok && r.replace"><i class="exchange icon"></i>{{_('CITRA_REPLACES')}} <b>{{r.replacesTitle | strip_c}}</b> ({{r.pack}} #{{r.slot + 1}})</span>
+            <span ng-if="r.ok && !r.replace"><i class="plus icon"></i>{{_('CITRA_FREE_SLOT')}} {{r.pack}} #{{r.slot + 1}}</span>
+            <span ng-if="!r.ok"><i class="remove icon"></i>{{_('CITRA_ERR_' + r.error)}} {{r.detail}}</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="citra-note"><i class="info circle icon"></i>{{_('CITRA_INSTALL_NOTE')}}</p>
+  </div>
+  <div class="actions">
+    <div class="ui cancel button">{{_('CANCEL')}}</div>
+    <div class="ui green button" ng-class="{disabled: !install_ok_count}" ng-click="confirm_install()"><i class="sign in icon"></i>{{_('CITRA_WRITE')}} ({{install_ok_count}})</div>
+  </div>
+</div>
+
+<div id="installresult" class="ui small modal">
+  <div class="header">{{last_result.ok ? _('CITRA_DONE') : _('CITRA_FAILED')}}</div>
+  <div class="content">
+    <p ng-if="last_result.ok">{{_('CITRA_DONE_MSG')}} <b>{{last_result.written.join(', ')}}</b></p>
+    <p ng-if="last_result.ok && last_result.backup">{{_('CITRA_BACKUP_DONE')}} <code>{{last_result.backup}}</code></p>
+    <p ng-if="last_result.ok">{{_('CITRA_START_GAME')}}</p>
+    <p ng-if="!last_result.ok" class="ui red text">{{last_result.error}}</p>
+  </div>
+  <div class="actions">
+    <a class="ui button" href="#/game" onclick="$('#installresult').modal('hide')">{{_('CITRA_GAME_QUESTS')}}</a>
+    <div class="ui blue cancel button">{{_('OK')}}</div>
+  </div>
+</div>
+
+<div id="citraNotFound" class="ui small modal">
+  <div class="header">{{_('CITRA_NOT_FOUND')}}</div>
+  <div class="content">
+    <p>{{_('CITRA_NOT_FOUND_MSG')}}</p>
+  </div>
+  <div class="actions">
+    <a class="ui button" href="#/settings" onclick="$('#citraNotFound').modal('hide')">{{_('CITRA_CHOOSE_FOLDER')}}</a>
+    <div class="ui blue cancel button">{{_('OK')}}</div>
+  </div>
+</div>
+
+
+<!-- collections: move / create / rename (plain overlays, moved to <body> by the controller) -->
+<div id="collmovemodal" class="xt-ov" ng-show="xt.ov.move" ng-click="ov_backdrop($event, 'move')"><div class="xt-box small">
+  <div class="header"><i class="folder open icon"></i>{{_('COLL_MOVE')}} <span class="citra-note">{{move_count}} {{_('COLL_QUESTS')}}</span></div>
+  <div class="content">
+    <div class="ui relaxed list">
+      <div class="item" ng-click="do_move(null)"><a class="ui fluid basic button">{{_('COLL_UNSORTED')}}</a></div>
+      <div class="item" ng-repeat="c in coll_list track by c.id" ng-click="do_move(c.id)"><a class="ui fluid {{c.color}} button"><i class="folder icon"></i>{{c.name}}</a></div>
+    </div>
+    <a class="ui fluid basic green button" ng-click="open_coll_edit(null, true)"><i class="plus icon"></i>{{_('COLL_NEW')}}</a>
+  </div>
+  <div class="actions"><div class="ui button" ng-click="ov_close('move')">{{_('CANCEL')}}</div></div>
+</div></div>
+
+<div id="colleditmodal" class="xt-ov" ng-show="xt.ov.cedit" ng-click="ov_backdrop($event, 'cedit')"><div class="xt-box small">
+  <div class="header"><i class="folder icon"></i>{{ce.id ? _('COLL_EDIT') : _('COLL_NEW')}}</div>
+  <div class="content">
+    <div class="ui form">
+      <div class="field" ng-class="{error: ce.error}"><label>{{_('COLL_NAME')}}</label>
+        <input type="text" id="collname" maxlength="40" ng-model="ce.name" ng-keydown="ce_key($event)" placeholder="{{_('COLL_NAME_PH')}}">
+        <div class="ui pointing red basic label" ng-if="ce.error">{{_(ce.error)}}</div></div>
+      <div class="field"><label>{{_('COLL_COLOR')}}</label>
+        <a ng-repeat="c in colors" class="ui {{c}} label coll-color" ng-class="{basic: ce.color !== c}" ng-click="ce.color = c" style="margin-bottom: 4px">&nbsp;<i class="check icon" ng-if="ce.color === c" style="margin:0"></i>&nbsp;</a></div>
+    </div>
+  </div>
+  <div class="actions">
+    <div ng-if="ce.id" class="ui red basic left floated button" ng-click="ce_delete()">
+      <i class="trash icon"></i>{{ce.confirm_delete ? _('COLL_DELETE_CONFIRM') : _('COLL_DELETE')}}
+    </div>
+    <div class="ui button" ng-click="ov_close('cedit')">{{_('CANCEL')}}</div>
+    <div class="ui green button" ng-click="ce_save()"><i class="check icon"></i>{{ce.id ? _('SAVE') : _('COLL_CREATE')}}</div>
+  </div>
+</div></div>

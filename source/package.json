@@ -1,0 +1,27 @@
+{
+  "name": "mh4u-quest-editor",
+  "version": "3.5.0",
+  "description": "MH4U Quest Editor, Citra edition: custom quests written straight into the event quests of Citra",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "dasding (original editor), Thomatelot (Citra edition)",
+  "license": "MIT",
+  "window": {
+    "title": "MH4U Quest Editor - Citra edition",
+    "icon": "icon.png",
+    "toolbar": false,
+    "show": false,
+    "frame": true,
+    "transparent": false,
+    "width": 860,
+    "height": 600,
+    "position": "center",
+    "min_width": 860,
+    "min_height": 400,
+    "resizable": true
+  },
+  "dom_storage_quota": 100,
+  "single-instance": true
+}

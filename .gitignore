@@ -1,0 +1,53 @@
+# ---- Game files: NEVER commit these ----
+*.3ds
+*.cia
+*.cci
+*.cxi
+*.3dsx
+*.app
+*.rom
+*.arc
+*.bin
+romfs/
+exefs/
+extdata/
+sdmc/
+quest[0-9]
+otomo[0-9]
+user[0-9]
+*.sav
+*.dec
+corpus.json
+msgs.json
+em_base_hp.json
+dlc_tables.json
+constants.json
+
+# ---- Your own data (backups, exported quests and libraries) ----
+Backups/
+Library_Backups/
+*.mib
+*.cmib
+*.otb
+
+# ---- Builds (releases are attached to GitHub Releases, not committed) ----
+/MH4U Quest Editor.exe
+*.exe
+*.zip
+nw.pak
+icudtl.dat
+*.dll
+/locales/
+
+# ---- Python / Node / tools / OS ----
+__pycache__/
+*.pyc
+node_modules/
+.venv/
+venv/
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini
+.DS_Store
+/dist/

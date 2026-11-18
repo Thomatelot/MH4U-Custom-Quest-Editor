@@ -1,0 +1,37 @@
+# species (MH4U classification) and an estimated difficulty written for this editor (1 = easy .. 5 = hardest), not a game value
+# kind: L = large monster, S = small monster, O = object (rocks)
+INFO = {
+ 1:('flying',2,'L'), 2:('flying',2,'L'), 3:('flying',3,'L'), 4:('flying',3,'L'), 5:('flying',4,'L'), 6:('flying',4,'L'),
+ 7:('bird',1,'L'), 8:('bird',2,'L'), 9:('bird',2,'L'), 10:('bird',2,'L'), 11:('flying',3,'L'), 12:('flying',3,'L'),
+ 13:('bird',1,'L'), 14:('bird',1,'L'), 15:('bird',1,'L'), 16:('bird',1,'L'), 17:('fanged_beast',2,'L'), 18:('fanged_beast',2,'L'),
+ 19:('fanged_beast',4,'L'), 20:('fanged_beast',1,'L'), 21:('amphibian',2,'L'), 22:('amphibian',2,'L'), 23:('snake',2,'L'),
+ 24:('elder',4,'L'), 25:('neopteron',1,'L'), 26:('neopteron',2,'L'), 27:('temnoceran',2,'L'), 28:('unknown',3,'L'),
+ 29:('elder',4,'L'), 30:('bird',3,'L'), 31:('elder',3,'L'), 32:('elder',4,'L'), 33:('flying',4,'L'), 34:('elder',3,'L'),
+ 35:('elder',3,'L'), 36:('flying',2,'L'), 37:('flying',3,'L'), 38:('flying',2,'L'), 39:('flying',3,'L'), 40:('flying',3,'L'),
+ 41:('flying',3,'L'), 42:('brute',4,'L'), 43:('brute',4,'L'), 44:('brute',4,'L'), 45:('fanged_beast',5,'L'), 46:('elder',3,'L'),
+ 47:('fanged_beast',2,'L'), 48:('fanged_wyvern',3,'L'), 49:('fanged_wyvern',4,'L'),
+ 50:('bird',0,'S'), 51:('herbivore',0,'S'), 52:('herbivore',0,'S'), 53:('herbivore',0,'S'), 54:('herbivore',0,'S'), 55:('herbivore',0,'S'),
+ 56:('bird',0,'S'), 57:('bird',0,'S'), 58:('bird',0,'S'), 59:('bird',0,'S'), 60:('bird',0,'S'), 61:('flying',0,'S'), 62:('piscine',0,'S'),
+ 63:('fanged_beast',0,'S'), 64:('herbivore',0,'S'), 65:('lynian',0,'S'), 66:('lynian',0,'S'), 67:('neopteron',0,'S'),
+ 68:('neopteron',0,'S'), 69:('neopteron',0,'S'), 70:('neopteron',0,'S'), 71:('neopteron',0,'S'), 72:('amphibian',0,'S'),
+ 73:('neopteron',0,'S'), 74:('neopteron',0,'S'), 75:('neopteron',0,'S'), 76:('neopteron',0,'S'),
+ 77:('elder',5,'L'), 78:('elder',5,'L'), 79:('elder',5,'L'), 80:('flying',4,'L'), 81:('object',0,'O'), 82:('elder',4,'L'),
+ 83:('elder',4,'L'), 84:('object',0,'O'), 85:('object',0,'O'), 86:('object',0,'O'), 87:('object',0,'O'), 88:('flying',3,'L'),
+ 89:('elder',5,'L'), 90:('fanged_beast',2,'L'), 91:('amphibian',3,'L'), 92:('amphibian',3,'L'), 93:('snake',3,'L'),
+ 94:('neopteron',2,'L'), 95:('neopteron',3,'L'), 96:('temnoceran',3,'L'), 97:('unknown',4,'L'), 98:('brute',5,'L'),
+ 99:('flying',3,'L'), 100:('flying',4,'L'), 101:('flying',3,'L'), 102:('flying',4,'L'), 103:('elder',4,'L'), 104:('object',0,'O'),
+ 105:('piscine',2,'L'), 106:('piscine',0,'S'), 107:('carapaceon',2,'L'), 108:('carapaceon',3,'L'), 109:('carapaceon',0,'S'),
+ 110:('elder',5,'L'), 111:('elder',5,'L'), 112:('fanged_beast',5,'L'), 113:('brute',5,'L'), 114:('fanged_wyvern',5,'L'),
+ 115:('flying',5,'L'), 116:('flying',5,'L'), 117:('elder',5,'L'), 118:('herbivore',0,'S'), 119:('flying',5,'L'),
+ 120:('snake',5,'L'), 121:('flying',5,'L'), 122:('flying',5,'L'), 123:('object',0,'O'),
+}
+SPECIES = {
+ 'flying': ('Flying Wyvern', 'Wyverne volante'), 'bird': ('Bird Wyvern', 'Wyverne oiseau'),
+ 'fanged_beast': ('Fanged Beast', 'Bête à crocs'), 'fanged_wyvern': ('Fanged Wyvern', 'Wyverne à crocs'),
+ 'brute': ('Brute Wyvern', 'Wyverne de terre'), 'amphibian': ('Amphibian', 'Amphibien'),
+ 'snake': ('Snake Wyvern', 'Wyverne serpent'), 'piscine': ('Piscine Wyvern', 'Wyverne aquatique'),
+ 'neopteron': ('Neopteron', 'Néoptère'), 'temnoceran': ('Temnoceran', 'Temnocère'),
+ 'carapaceon': ('Carapaceon', 'Carapaceon'), 'elder': ('Elder Dragon', 'Dragon ancien'),
+ 'unknown': ('??? (Gore Magala)', '??? (Gore Magala)'), 'herbivore': ('Herbivore', 'Herbivore'),
+ 'lynian': ('Lynian', 'Lynien'), 'object': ('Object / rock', 'Objet / rocher'),
+}
